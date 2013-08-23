@@ -1,0 +1,52 @@
+  Software License :
+  
+  Copyright (c) 2003, The Open Effects Association Ltd. All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+  
+  * Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+  * Neither the name The Open Effects Association Ltd, nor the names of its 
+  contributors may be used to endorse or promote products derived from this
+  software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+
+
+What is it?
+-----------
+These are two plugins which are wrappers around the openCV functions
+"cvInpaint"
+and
+"cvPyrSegmentation"
+which add this functionality to Sony Vegas 10.
+The wrapper has been written by Bernd Porr, 
+http://www.berndporr.me.uk, berndporr@f2s.com.
+
+How to install?
+---------------
+You can install the binary files by copying them into the Vegas openFX
+plugin folder:
+copy *.ofx "c:\Program Files\Sony\Vegas Pro 10.0\OFX Video Plug-Ins\Filters.ofx.bundle\Contents\Win32"
+You also need to install openCV 2.1 which is available from Sourceforge.
+
+How to compile?
+---------------
+You need to have the gcc and make installed on your system. The easiest way is to install MinGW.
+You also need to download the openFX header files from Sourceforge. Modify the Makefile
+in case the openFX header files reside in another subdirectory.
