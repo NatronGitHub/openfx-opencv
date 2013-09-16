@@ -210,7 +210,7 @@ static OfxStatus render(OfxImageEffectHandle instance,
     gEffectHost->clipGetImage(outputClip, time, NULL, &outputImg);
 
     // fetch output image info from that handle
-    int dstRowBytes, dstBitDepth;
+    int dstRowBytes;//, dstBitDepth;
     OfxRectI dstRect;
     void *dstPtr;
     gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
@@ -227,7 +227,7 @@ static OfxStatus render(OfxImageEffectHandle instance,
     gEffectHost->clipGetImage(sourceClip, time, NULL, &sourceImg);
 
     // fetch image info out of that handle
-    int srcRowBytes, srcBitDepth;
+    int srcRowBytes;//, srcBitDepth;
     OfxRectI srcRect;
     void *srcPtr;
     gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
@@ -400,7 +400,7 @@ describeInContext( OfxImageEffectHandle  effect,  OfxPropertySetHandle inArgs)
 		    0);
 
   // make a page of controls and add my parameters to it
-  OfxParamHandle page;
+  //OfxParamHandle page;
   gParamHost->paramDefine(paramSet, kOfxParamTypePage, "Main", &props);
   gPropHost->propSetString(props, kOfxParamPropPageChild, 0, INPAINT_RADIUS);
   gPropHost->propSetString(props, kOfxParamPropPageChild, 1, DILATION);
