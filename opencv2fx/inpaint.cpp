@@ -455,31 +455,42 @@ onLoad(void)
 static OfxStatus
 pluginMain(const char *action,  const void *handle, OfxPropertySetHandle inArgs,  OfxPropertySetHandle outArgs)
 {
-  // cast to appropriate type
-  OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
+    try {
+        // cast to appropriate type
+        OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
 
-  if(strcmp(action, kOfxActionLoad) == 0) {
-    return onLoad();
-  }
-  else if(strcmp(action, kOfxActionDescribe) == 0) {
-    return describe(effect);
-  }
-  else if(strcmp(action, kOfxImageEffectActionDescribeInContext) == 0) {
-    return describeInContext(effect, inArgs);
-  }
-  else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
-    return render(effect, inArgs, outArgs);
-  }
-  else if(strcmp(action, kOfxActionCreateInstance) == 0) {
-    return createInstance(effect);
-  } 
-  else if(strcmp(action, kOfxActionDestroyInstance) == 0) {
-    return destroyInstance(effect);
-  } 
-
+        if(strcmp(action, kOfxActionLoad) == 0) {
+            return onLoad();
+        } else if(strcmp(action, kOfxActionDescribe) == 0) {
+            return describe(effect);
+        } else if(strcmp(action, kOfxImageEffectActionDescribeInContext) == 0) {
+            return describeInContext(effect, inArgs);
+        } else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
+            return render(effect, inArgs, outArgs);
+        } else if(strcmp(action, kOfxActionCreateInstance) == 0) {
+            return createInstance(effect);
+        } else if(strcmp(action, kOfxActionDestroyInstance) == 0) {
+            return destroyInstance(effect);
+        }
+    } catch (const OFX::Exception::Suite &e) {
+        std::cout << "OFX Plugin Suite error: " << e.what() << std::endl;
+        return e.status();
+    } catch (std::bad_alloc) {
+        // catch memory
+        std::cout << "OFX Plugin Memory error." << std::endl;
+        return kOfxStatErrMemory;
+    } catch ( const std::exception& e ) {
+        // standard exceptions
+        std::cout << "OFX Plugin error: " << e.what() << std::endl;
+        return kOfxStatErrUnknown;
+    } catch ( ... ) {
+        // everything else
+        std::cout << "OFX Plugin error" << std::endl;
+        return kOfxStatErrUnknown;
+    }
     
-  // other actions to take the default value
-  return kOfxStatReplyDefault;
+    // other actions to take the default value
+    return kOfxStatReplyDefault;
 }
 
 // function to set the host structure
