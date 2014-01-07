@@ -315,6 +315,7 @@
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/../Libraries";
 				LIBRARY_SEARCH_PATHS = "$(OPENCV_PATH)/lib";
 				OFX_PATH = ../openfx;
 				ONLY_ACTIVE_ARCH = YES;
@@ -343,6 +344,7 @@
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/../Libraries";
 				LIBRARY_SEARCH_PATHS = "$(OPENCV_PATH)/lib";
 				OFX_PATH = ../openfx;
 				OPENCV_PATH = /opt/local;
