@@ -7,4 +7,4 @@ before_install:
   - sudo apt-get update
 install:
   - apt-get install libopencv-dev
-script: make DEBUGFLAG=-O3 BITS=64
+script: make -C opencv2fx BITS=64
