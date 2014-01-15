@@ -6,8 +6,8 @@ before_install:
   - git submodule update --init --recursive
   - sudo apt-get update
 install:
-  - sudo apt-get install libopencv-dev
+  - sudo apt-get install libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
   - pkg-config opencv --cflags
   - pkg-config opencv --libs
-  - find /usr/include -name cv.h -print
+  - ls -R /usr/include/opencv
 script: make -C opencv2fx BITS=64
