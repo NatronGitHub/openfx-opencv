@@ -2,8 +2,11 @@ language: cpp
 compiler:
   - gcc
   - clang
+# inpaint plugin requires OpenCV 2.4, but Ubuntu Precise 12.0 only has 2.3.1
+# OpenCV 2.4.5 can be found in Kubuntu-ppa Backports
 before_install:
   - git submodule update --init --recursive
+  - sudo add-apt-repository ppa:kubuntu-ppa/backports 
   - sudo apt-get update
 install:
   - sudo apt-get install libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
