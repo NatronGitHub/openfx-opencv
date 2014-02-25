@@ -2,7 +2,7 @@
 build
 project.xcworkspace
 xcuserdata
-
+DerivedData
 *.ofx
 
 *.o
