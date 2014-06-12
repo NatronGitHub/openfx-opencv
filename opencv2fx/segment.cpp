@@ -105,15 +105,18 @@ static MyInstanceData *
 getMyInstanceData( OfxImageEffectHandle effect)
 {
   // get the property handle for the plugin
-  OfxPropertySetHandle effectProps;
-  gEffectHost->getPropertySet(effect, &effectProps);
+  OfxPropertySetHandle effectProps = 0;
+  OfxStatus stat;
+  stat = gEffectHost->getPropertySet(effect, &effectProps);
+  OFX::throwSuiteStatusException(stat);
 
   // get my data pointer out of that
   MyInstanceData *myData = 0;
-  gPropHost->propGetPointer(effectProps,  
+  stat = gPropHost->propGetPointer(effectProps,
 			    kOfxPropInstanceData, 
 			    0, 
 			    (void **) &myData);
+  OFX::throwSuiteStatusException(stat);
   return myData;
 }
 
@@ -123,26 +126,32 @@ static OfxStatus
 createInstance( OfxImageEffectHandle effect)
 {
   // get a pointer to the effect properties
-  OfxPropertySetHandle effectProps;
-  gEffectHost->getPropertySet(effect, &effectProps);
+  OfxPropertySetHandle effectProps = 0;
+  OfxStatus stat;
+  stat = gEffectHost->getPropertySet(effect, &effectProps);
+  OFX::throwSuiteStatusException(stat);
 
   // get a pointer to the effect's parameter set
-  OfxParamSetHandle paramSet;
-  gEffectHost->getParamSet(effect, &paramSet);
+  OfxParamSetHandle paramSet = 0;
+  stat = gEffectHost->getParamSet(effect, &paramSet);
+  OFX::throwSuiteStatusException(stat);
 
   // make my private instance data
   MyInstanceData *myData = new MyInstanceData;
   if (myData==NULL) return kOfxStatFailed;
 
   // cache away out param handles
-  gParamHost->paramGetHandle(paramSet, THRESHOLD1, &myData->threshold1, 0);
-  gParamHost->paramGetHandle(paramSet, THRESHOLD2, &myData->threshold2, 0);
+  stat = gParamHost->paramGetHandle(paramSet, THRESHOLD1, &myData->threshold1, 0);
+  OFX::throwSuiteStatusException(stat);
+  stat = gParamHost->paramGetHandle(paramSet, THRESHOLD2, &myData->threshold2, 0);
+  OFX::throwSuiteStatusException(stat);
 
   myData->storage = cvCreateMemStorage ( BLOCK_SIZE );
   myData->comp = NULL;
 
   // set my private instance data
-  gPropHost->propSetPointer(effectProps, kOfxPropInstanceData, 0, (void *) myData);
+  stat = gPropHost->propSetPointer(effectProps, kOfxPropInstanceData, 0, (void *) myData);
+  OFX::throwSuiteStatusException(stat);
 
   return kOfxStatOK;
 }
@@ -188,50 +197,67 @@ static OfxStatus render(OfxImageEffectHandle instance,
     // get the render window and the time from the inArgs
     OfxTime time;
     OfxRectI renderWindow;
+    OfxStatus stat;
 
-    gPropHost->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    gPropHost->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    stat = gPropHost->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    OFX::throwSuiteStatusException(stat);
 
     // fetch output clip
-    OfxImageClipHandle outputClip;
-    gEffectHost->clipGetHandle(instance, "Output", &outputClip, 0);
+    OfxImageClipHandle outputClip = 0;
+    stat = gEffectHost->clipGetHandle(instance, kOfxImageEffectOutputClipName, &outputClip, 0);
+    OFX::throwSuiteStatusException(stat);
 
     // fetch image to render into from that clip
-    OfxPropertySetHandle outputImg;
-    gEffectHost->clipGetImage(outputClip, time, NULL, &outputImg);
+    OfxPropertySetHandle outputImg = 0;
+    stat = gEffectHost->clipGetImage(outputClip, time, NULL, &outputImg);
+    OFX::throwSuiteStatusException(stat);
 
     // fetch output image info from that handle
-    int dstRowBytes, dstBitDepth;
+    int dstRowBytes;
     OfxRectI dstRect;
     void *dstPtr;
-    gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
-    gPropHost->propGetIntN(outputImg, kOfxImagePropBounds, 4, &dstRect.x1);
-    gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
-    gPropHost->propGetPointer(outputImg, kOfxImagePropData, 0, &dstPtr);
-  
+    stat = gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetIntN(outputImg, kOfxImagePropBounds, 4, &dstRect.x1);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetPointer(outputImg, kOfxImagePropData, 0, &dstPtr);
+    OFX::throwSuiteStatusException(stat);
+
     // fetch main input clip
-    OfxImageClipHandle sourceClip;
-    gEffectHost->clipGetHandle(instance, "Source", &sourceClip, 0);
+    OfxImageClipHandle sourceClip = 0;
+    stat = gEffectHost->clipGetHandle(instance, kOfxImageEffectSimpleSourceClipName, &sourceClip, 0);
+    OFX::throwSuiteStatusException(stat);
 
     // fetch image at render time from that clip
-    OfxPropertySetHandle sourceImg;
-    gEffectHost->clipGetImage(sourceClip, time, NULL, &sourceImg);
+    OfxPropertySetHandle sourceImg = 0;
+    stat = gEffectHost->clipGetImage(sourceClip, time, NULL, &sourceImg);
+    OFX::throwSuiteStatusException(stat);
 
     // fetch image info out of that handle
-    int srcRowBytes, srcBitDepth;
+    int srcRowBytes;
     OfxRectI srcRect;
     void *srcPtr;
-    gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
-    gPropHost->propGetIntN(sourceImg, kOfxImagePropBounds, 4, &srcRect.x1);
-    gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
-    gPropHost->propGetPointer(sourceImg, kOfxImagePropData, 0, &srcPtr);
+    stat = gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetIntN(sourceImg, kOfxImagePropBounds, 4, &srcRect.x1);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
+    OFX::throwSuiteStatusException(stat);
+    stat = gPropHost->propGetPointer(sourceImg, kOfxImagePropData, 0, &srcPtr);
+    OFX::throwSuiteStatusException(stat);
 
     // retrieve any instance data associated with this effect
     MyInstanceData *myData = getMyInstanceData(instance);
     
     double t1,t2;
-    gParamHost->paramGetValueAtTime(myData->threshold1, time, &t1);
-    gParamHost->paramGetValueAtTime(myData->threshold2, time, &t2);
+    stat = gParamHost->paramGetValueAtTime(myData->threshold1, time, &t1);
+    OFX::throwSuiteStatusException(stat);
+    stat = gParamHost->paramGetValueAtTime(myData->threshold2, time, &t2);
+    OFX::throwSuiteStatusException(stat);
 
     // cast data pointers to 8 bit RGBA
     OfxRGBAColourB *dst = (OfxRGBAColourB *) dstPtr;
@@ -298,9 +324,11 @@ static OfxStatus render(OfxImageEffectHandle instance,
     cvReleaseImage(&image1);
   
     // we are finished with the source images so release them
-    gEffectHost->clipReleaseImage(sourceImg);
-    gEffectHost->clipReleaseImage(outputImg);
-    
+    stat = gEffectHost->clipReleaseImage(sourceImg);
+    OFX::throwSuiteStatusException(stat);
+    stat = gEffectHost->clipReleaseImage(outputImg);
+    OFX::throwSuiteStatusException(stat);
+
     // all was well
     return kOfxStatOK;
 }
@@ -312,18 +340,23 @@ static OfxStatus render(OfxImageEffectHandle instance,
 static OfxStatus
 describeInContext( OfxImageEffectHandle  effect,  OfxPropertySetHandle inArgs)
 {
-  OfxPropertySetHandle props;
+  OfxPropertySetHandle props = 0;
+  OfxStatus stat;
   // define the single output clip in both contexts
-  gEffectHost->clipDefine(effect, "Output", &props);
+  stat = gEffectHost->clipDefine(effect, kOfxImageEffectOutputClipName, &props);
+  OFX::throwSuiteStatusException(stat);
 
   // set the component types we can handle on out output
-  gPropHost->propSetString(props, kOfxImageEffectPropSupportedComponents, 0, kOfxImageComponentRGBA);
+  stat = gPropHost->propSetString(props, kOfxImageEffectPropSupportedComponents, 0, kOfxImageComponentRGBA);
+  OFX::throwSuiteStatusException(stat);
 
   // define the single source clip in both contexts
-  gEffectHost->clipDefine(effect, "Source", &props);
+  stat = gEffectHost->clipDefine(effect, kOfxImageEffectSimpleSourceClipName, &props);
+  OFX::throwSuiteStatusException(stat);
 
   // set the component types we can handle on our main input
-  gPropHost->propSetString(props, kOfxImageEffectPropSupportedComponents, 0, kOfxImageComponentRGBA);
+  stat = gPropHost->propSetString(props, kOfxImageEffectPropSupportedComponents, 0, kOfxImageComponentRGBA);
+  OFX::throwSuiteStatusException(stat);
 
   if(!gHost)
     return kOfxStatErrMissingHostFeature;
@@ -341,8 +374,9 @@ describeInContext( OfxImageEffectHandle  effect,  OfxPropertySetHandle inArgs)
   ////////////////////////////////////////////////////////////////////////////////
   // define the parameters for this context
   // fetch the parameter set from the effect
-  OfxParamSetHandle paramSet;
-  gEffectHost->getParamSet(effect, &paramSet);
+  OfxParamSetHandle paramSet = 0;
+  stat = gEffectHost->getParamSet(effect, &paramSet);
+  OFX::throwSuiteStatusException(stat);
 
   defineDoubleParam(gPropHost,
 		    gParamHost,
@@ -365,9 +399,12 @@ describeInContext( OfxImageEffectHandle  effect,  OfxPropertySetHandle inArgs)
 		    30);
 
   // make a page of controls and add my parameters to it
-  gParamHost->paramDefine(paramSet, kOfxParamTypePage, "Main", &props);
-  gPropHost->propSetString(props, kOfxParamPropPageChild, 0, THRESHOLD1);
-  gPropHost->propSetString(props, kOfxParamPropPageChild, 1, THRESHOLD2);
+  stat = gParamHost->paramDefine(paramSet, kOfxParamTypePage, "Main", &props);
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetString(props, kOfxParamPropPageChild, 0, THRESHOLD1);
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetString(props, kOfxParamPropPageChild, 1, THRESHOLD2);
+  OFX::throwSuiteStatusException(stat);
 
   return kOfxStatOK;
 }
@@ -378,23 +415,47 @@ static OfxStatus
 describe(OfxImageEffectHandle effect)
 {
   // get the property handle for the plugin
-  OfxPropertySetHandle effectProps;
-  gEffectHost->getPropertySet(effect, &effectProps);
+  OfxPropertySetHandle effectProps = 0;
+  OfxStatus stat;
+  stat = gEffectHost->getPropertySet(effect, &effectProps);
+  OFX::throwSuiteStatusException(stat);
 
   // say we cannot support multiple pixel depths and let the clip preferences action deal with it all.
-  gPropHost->propSetInt(effectProps, kOfxImageEffectPropSupportsMultipleClipDepths, 0, 0);
-  
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPropSupportsMultipleClipDepths, 0, 0);
+  OFX::throwSuiteStatusException(stat);
+
   // set the bit depths the plugin can handle
-  gPropHost->propSetString(effectProps, kOfxImageEffectPropSupportedPixelDepths, 0, kOfxBitDepthByte);
+  stat = gPropHost->propSetString(effectProps, kOfxImageEffectPropSupportedPixelDepths, 0, kOfxBitDepthByte);
+  OFX::throwSuiteStatusException(stat);
 
   // set plugin label and the group it belongs to
-  gPropHost->propSetString(effectProps, kOfxPropLabel, 0, "openCV Segment");
-  gPropHost->propSetString(effectProps, kOfxImageEffectPluginPropGrouping, 0, PLUGIN_GROUPING);
-  gPropHost->propSetString(effectProps, kOfxPropPluginDescription, 0, pluginDescription);
+  stat = gPropHost->propSetString(effectProps, kOfxPropLabel, 0, "openCV Segment");
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetString(effectProps, kOfxImageEffectPluginPropGrouping, 0, PLUGIN_GROUPING);
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetString(effectProps, kOfxPropPluginDescription, 0, pluginDescription);
+  OFX::throwSuiteStatusException(stat);
 
   // define the contexts we can be used in
-  gPropHost->propSetString(effectProps, kOfxImageEffectPropSupportedContexts, 0, kOfxImageEffectContextFilter);
-  
+  stat = gPropHost->propSetString(effectProps, kOfxImageEffectPropSupportedContexts, 0, kOfxImageEffectContextFilter);
+  OFX::throwSuiteStatusException(stat);
+
+  // set a few flags
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPluginPropSingleInstance, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPluginPropHostFrameThreading, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPropSupportsMultiResolution, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPropSupportsTiles, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPropTemporalClipAccess, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPluginPropFieldRenderTwiceAlways, 0, int(true));
+  OFX::throwSuiteStatusException(stat);
+  stat = gPropHost->propSetInt(effectProps, kOfxImageEffectPropSupportsMultipleClipPARs, 0, int(false));
+  OFX::throwSuiteStatusException(stat);
+
   return kOfxStatOK;
 }
 

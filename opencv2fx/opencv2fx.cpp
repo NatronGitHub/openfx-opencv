@@ -68,7 +68,7 @@ void defineDoubleParam( OfxPropertySuiteV1 *gPropHost,
 			double initial)
 {
   //OfxParamHandle param;
-  OfxPropertySetHandle props;
+  OfxPropertySetHandle props = 0;
   OfxStatus stat;
 
   stat = gParamHost->paramDefine(effectParams, kOfxParamTypeDouble, name, &props);
