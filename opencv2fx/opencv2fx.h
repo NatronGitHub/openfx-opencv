@@ -7,7 +7,7 @@
 #include "ofxMultiThread.h"
 #include "ofxPixels.h"
 
-#define PLUGIN_GROUPING "www.bratwurstandhaggis.org.uk"
+#define PLUGIN_GROUPING "Draw"
 
 // defines a new control for the plugin which controls a floating point variable
 void defineDoubleParam( OfxPropertySuiteV1 *gPropHost,
