@@ -17,4 +17,4 @@ before_install:
   - sudo apt-get update
 install:
   - sudo apt-get install libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
-script: make -C opencv2fx BITS=64
+script: make -C opencv2fx CONFIG=debug
