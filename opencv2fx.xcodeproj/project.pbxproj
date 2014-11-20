@@ -30,6 +30,9 @@
 		1E46936217C747B90073A6EF /* libopencv_legacy.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46935C17C7471D0073A6EF /* libopencv_legacy.dylib */; };
 		1E46936417C747E80073A6EF /* libopencv_photo.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46936317C747E80073A6EF /* libopencv_photo.dylib */; };
 		1E551F5B179950EC00A4135C /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E551F5A179950EC00A4135C /* OpenGL.framework */; };
+		ACAD40371A1E3D63002EB36F /* ofxsLut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACAD40351A1E3D57002EB36F /* ofxsLut.cpp */; };
+		ACAD404A1A1E583E002EB36F /* ofxsSupportPrivate.h in Sources */ = {isa = PBXBuildFile; fileRef = ACADEB5E1A1D0045002031F2 /* ofxsSupportPrivate.h */; };
+		ACAD404E1A1E58FD002EB36F /* PluginRegistration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACAD404C1A1E58C8002EB36F /* PluginRegistration.cpp */; };
 		ACADEB711A1D008B002031F2 /* inpaint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACADEB651A1D0062002031F2 /* inpaint.cpp */; };
 		ACADEB721A1D0091002031F2 /* opencv2fx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACADEB691A1D0062002031F2 /* opencv2fx.cpp */; };
 		ACADEB731A1D0097002031F2 /* opencv2fx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACADEB691A1D0062002031F2 /* opencv2fx.cpp */; };
@@ -75,6 +78,10 @@
 		1E551EC117994D4000A4135C /* inpaint.ofx.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = inpaint.ofx.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E551ED917994E8100A4135C /* segment.ofx.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = segment.ofx.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E551F5A179950EC00A4135C /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		ACAD40351A1E3D57002EB36F /* ofxsLut.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsLut.cpp; sourceTree = "<group>"; };
+		ACAD40361A1E3D57002EB36F /* ofxsLut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsLut.h; sourceTree = "<group>"; };
+		ACAD404B1A1E5885002EB36F /* PluginRegistrationCombined.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PluginRegistrationCombined.cpp; sourceTree = "<group>"; };
+		ACAD404C1A1E58C8002EB36F /* PluginRegistration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PluginRegistration.cpp; sourceTree = "<group>"; };
 		ACADEB381A1D0020002031F2 /* camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = camera.h; sourceTree = "<group>"; };
 		ACADEB391A1D0020002031F2 /* fnOfxExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fnOfxExtensions.h; sourceTree = "<group>"; };
 		ACADEB3A1A1D0020002031F2 /* fnPublicOfxExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fnPublicOfxExtensions.h; sourceTree = "<group>"; };
@@ -307,6 +314,7 @@
 		ACADEB5F1A1D0050002031F2 /* CVSupport */ = {
 			isa = PBXGroup;
 			children = (
+				ACAD404B1A1E5885002EB36F /* PluginRegistrationCombined.cpp */,
 				ACADEB601A1D0050002031F2 /* GenericCVPlugin.cpp */,
 				ACADEB611A1D0050002031F2 /* GenericCVPlugin.h */,
 			);
@@ -351,6 +359,7 @@
 		ACC122B71A1D028D00EB64B9 /* VectorGenerator */ = {
 			isa = PBXGroup;
 			children = (
+				ACAD404C1A1E58C8002EB36F /* PluginRegistration.cpp */,
 				ACC122B81A1D028D00EB64B9 /* Info.plist */,
 				ACC122B91A1D028D00EB64B9 /* Makefile */,
 				ACC122BA1A1D028D00EB64B9 /* VectorGenerator.cpp */,
@@ -362,6 +371,8 @@
 		ACC122D41A1D044900EB64B9 /* SupportExt */ = {
 			isa = PBXGroup;
 			children = (
+				ACAD40351A1E3D57002EB36F /* ofxsLut.cpp */,
+				ACAD40361A1E3D57002EB36F /* ofxsLut.h */,
 				ACC122D51A1D044900EB64B9 /* .gitignore */,
 				ACC122D61A1D044900EB64B9 /* ofxsCopier.h */,
 				ACC122D71A1D044900EB64B9 /* ofxsFilter.h */,
@@ -530,6 +541,9 @@
 				ACC122D01A1D031400EB64B9 /* ofxsMultiThread.cpp in Sources */,
 				ACC122D31A1D031800EB64B9 /* ofxsPropertyValidation.cpp in Sources */,
 				ACC122D11A1D031500EB64B9 /* ofxsParams.cpp in Sources */,
+				ACAD404A1A1E583E002EB36F /* ofxsSupportPrivate.h in Sources */,
+				ACAD40371A1E3D63002EB36F /* ofxsLut.cpp in Sources */,
+				ACAD404E1A1E58FD002EB36F /* PluginRegistration.cpp in Sources */,
 				ACC122CE1A1D030D00EB64B9 /* ofxsInteract.cpp in Sources */,
 				ACC122CC1A1D030900EB64B9 /* ofxsCore.cpp in Sources */,
 			);
@@ -575,6 +589,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(OFX_PATH)/include",
+					"$(OFX_PATH)/Support/Plugins/include",
+					"$(OFX_PATH)/Support/include",
+					SupportExt,
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);
@@ -608,6 +625,9 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(OFX_PATH)/include",
+					"$(OFX_PATH)/Support/Plugins/include",
+					"$(OFX_PATH)/Support/include",
+					SupportExt,
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);

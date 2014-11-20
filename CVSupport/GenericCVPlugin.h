@@ -41,21 +41,37 @@
 #include "ofxsMacros.h"
 
 #include <cv.h>
+namespace OFX
+{
+    namespace Color {
+        class LutBase;
+    }
+}
+
+
+//8bit sRGB images
+class CVImageWrapper
+{
+public:
+    
+    CVImageWrapper();
+    
+    ~CVImageWrapper();
+    
+    void initialise(OFX::ImageEffect* instance,const OfxRectI& bounds,int nComps);
+    
+    unsigned char* getData() const;
+private:
+    
+    IplImage* _cvImgHeader;
+    std::auto_ptr<OFX::ImageMemory> _mem;
+};
 
 class GenericCVPlugin : public OFX::ImageEffect
 {
 public:
     /** @brief ctor */
-    GenericCVPlugin(OfxImageEffectHandle handle)
-    : ImageEffect(handle)
-    , dstClip_(0)
-    , srcClip_(0)
-    {
-        dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
-        srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
-
-    
-    }
+    GenericCVPlugin(OfxImageEffectHandle handle);
     
 private:
     // override the roi call
@@ -64,18 +80,28 @@ private:
     //virtual bool getRegionOfDefinition(const OFX::RegionOfDefinitionArguments &args, OfxRectD &rod) OVERRIDE FINAL;
     
     /* Override the render */
-    virtual void render(const OFX::RenderArguments &args) OVERRIDE FINAL;
+    //virtual void render(const OFX::RenderArguments &args) OVERRIDE FINAL;
     
-    virtual bool isIdentity(const OFX::IsIdentityArguments &args, OFX::Clip * &identityClip, double &identityTime) OVERRIDE FINAL;
-
+    //virtual bool isIdentity(const OFX::IsIdentityArguments &args, OFX::Clip * &identityClip, double &identityTime) OVERRIDE FINAL;
+    
 protected:
+    
+    void fetchCVImage(OFX::Clip* clip,OfxTime time,const OfxRectI& renderWindow,const OfxPointD& expectedRenderScale,
+                      const OFX::BitDepthEnum expectedBitDepth,bool copyData,CVImageWrapper* cvImg);
     
     // do not need to delete these, the ImageEffect is managing them for us
     OFX::Clip *dstClip_;
     OFX::Clip *srcClip_;
+    const OFX::Color::LutBase* _srgbLut;
     
 };
 
+void genericCVDescribe(const std::string& pluginName,const std::string& pluginGrouping,
+                       const std::string& pluginDescription,
+                       bool supportsTile,bool supportsMultiResolution,bool temporalClipAccess,
+                       OFX::RenderSafetyEnum threadSafety,
+                       OFX::ImageEffectDescriptor& desc);
 
+void genericCVDescribeInContextBegin(bool supportsTiles,OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context);
 
 #endif /* defined(__opencv2fx__GenericCVPlugin__) */
