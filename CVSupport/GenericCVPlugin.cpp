@@ -87,28 +87,15 @@ GenericCVPlugin::GenericCVPlugin(OfxImageEffectHandle handle)
 }
 
 void
-GenericCVPlugin::fetchCVImage(OFX::Clip* clip,OfxTime time,const OfxRectI& renderWindow,const OfxPointD& expectedRenderScale,
-                              const OFX::BitDepthEnum expectedBitDepth,bool copyData,CVImageWrapper* cvImg)
+GenericCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool copyData,CVImageWrapper* cvImg)
 {
-    std::auto_ptr<OFX::Image> img(clip->fetchImage(time));
-    if (!img.get()) {
-        OFX::throwSuiteStatusException(kOfxStatFailed);
-    }
-    if (img->getRenderScale().x != expectedRenderScale.x ||
-        img->getRenderScale().y != expectedRenderScale.y ||
-        img->getPixelDepth() != expectedBitDepth) {
-        
-        setPersistentMessage(OFX::Message::eMessageError, "", "OFX Host gave image with wrong scale or field properties");
-        OFX::throwSuiteStatusException(kOfxStatFailed);
-        
-    }
-    
+  
     void* pixelData = NULL;
     OfxRectI bounds;
     OFX::PixelComponentEnum pixelComponents;
     OFX::BitDepthEnum bitDepth;
     int rowBytes;
-    getImageData(img.get(), &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
+    getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
     
     int nChannels;
     switch (pixelComponents) {
@@ -146,6 +133,40 @@ GenericCVPlugin::fetchCVImage(OFX::Clip* clip,OfxTime time,const OfxRectI& rende
                                  renderWindow,
                                  (renderWindow.x2 - renderWindow.x1) * sizeof(unsigned char) * nChannels);
     }
+}
+
+void
+GenericCVPlugin::cvImageToOfxImage(OFX::Image* img,const OfxRectI& renderWindow,const CVImageWrapper& cvImg)
+{
+    void* pixelData = NULL;
+    OfxRectI bounds;
+    OFX::PixelComponentEnum pixelComponents;
+    OFX::BitDepthEnum bitDepth;
+    int rowBytes;
+    getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
+    int nChannels;
+    switch (pixelComponents) {
+        case OFX::ePixelComponentAlpha:
+            nChannels = 1;
+            break;
+        case OFX::ePixelComponentRGB:
+            nChannels = 3;
+            break;
+        case OFX::ePixelComponentRGBA:
+            nChannels = 4;
+            break;
+        default:
+            assert(false);
+            break;
+    }
+    _srgbLut->from_byte_packed((float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1),
+                               cvImg.getData(),
+                               renderWindow,
+                               nChannels,
+                               renderWindow,
+                               (renderWindow.x2 - renderWindow.x1) * sizeof(unsigned char) * nChannels,
+                               bounds,
+                               rowBytes);
 }
 
 void

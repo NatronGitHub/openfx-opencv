@@ -86,8 +86,9 @@ private:
     
 protected:
     
-    void fetchCVImage(OFX::Clip* clip,OfxTime time,const OfxRectI& renderWindow,const OfxPointD& expectedRenderScale,
-                      const OFX::BitDepthEnum expectedBitDepth,bool copyData,CVImageWrapper* cvImg);
+    void fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool copyData,CVImageWrapper* cvImg);
+    
+    void cvImageToOfxImage(OFX::Image* img,const OfxRectI& renderWindow,const CVImageWrapper& cvImg);
     
     // do not need to delete these, the ImageEffect is managing them for us
     OFX::Clip *dstClip_;
