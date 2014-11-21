@@ -115,12 +115,12 @@
 using namespace OFX;
 using namespace cv;
 
-class VectorGeneratorPlugin : public GenericCVPlugin
+class VectorGeneratorPlugin : public GenericOpenCVPlugin
 {
   public:
     /** @brief ctor */
     VectorGeneratorPlugin(OfxImageEffectHandle handle)
-    : GenericCVPlugin(handle)
+    : GenericOpenCVPlugin(handle)
     , _rChannel(0)
     , _gChannel(0)
     , _bChannel(0)
