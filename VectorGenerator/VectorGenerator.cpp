@@ -73,7 +73,7 @@
 
 
 #include "GenericCVPlugin.h"
-
+#include "ofxsLut.h"
 
 #define kPluginName "VectorGeneratorOFX"
 #define kPluginGrouping "Time"
@@ -87,38 +87,311 @@
 #define kSupportsRenderScale 1
 #define kRenderThreadSafety eRenderFullySafe
 
+#define kParamRChannel "rChannel"
+#define kParamRChannelLabel "R channel"
+#define kParamRChannelHint "Selects which component of the motion vectors to set in the red channel of the output image"
+
+#define kParamGChannel "gChannel"
+#define kParamGChannelLabel "G channel"
+#define kParamGChannelHint "Selects which component of the motion vectors to set in the green channel of the output image"
+
+#define kParamBChannel "bChannel"
+#define kParamBChannelLabel "B channel"
+#define kParamBChannelHint "Selects which component of the motion vectors to set in the blue channel of the output image"
+
+#define kParamAChannel "aChannel"
+#define kParamAChannelLabel "A channel"
+#define kParamAChannelHint "Selects which component of the motion vectors to set in the alpha channel of the output image"
+
+#define kChannelNone "-"
+
+#define kChannelBackwardU "backward.u"
+#define kChannelBackwardV "backward.v"
+
+#define kChannelForwardU "forward.u"
+#define kChannelForwardV "forward.v"
 
 using namespace OFX;
+using namespace cv;
 
 class VectorGeneratorPlugin : public GenericCVPlugin
 {
   public:
     /** @brief ctor */
     VectorGeneratorPlugin(OfxImageEffectHandle handle)
-            : GenericCVPlugin(handle)
+    : GenericCVPlugin(handle)
+    , _rChannel(0)
+    , _gChannel(0)
+    , _bChannel(0)
+    , _aChannel(0)
     {
-        maskClip_ = getContext() == OFX::eContextFilter ? NULL : fetchClip(getContext() == OFX::eContextPaint ? "Brush" : "Mask");
-        assert(!maskClip_ || maskClip_->getPixelComponents() == ePixelComponentAlpha);
-    
+        _rChannel = fetchChoiceParam(kParamRChannel);
+        _gChannel = fetchChoiceParam(kParamGChannel);
+        _bChannel = fetchChoiceParam(kParamBChannel);
+        _aChannel = fetchChoiceParam(kParamAChannel);
+        assert(_rChannel && _gChannel && _bChannel && _aChannel);
     }
 
   private:
     /* Override the render */
     virtual void render(const OFX::RenderArguments &args) OVERRIDE FINAL;
 
+    /**
+     * @brief Compute motion vectors from 'ref' to 'other' on the given renderWindow and set them in the given channel indexes
+     * of the dst Image.
+     * @param channelIndex[in] A vector for each coordinate (x,y) of components of the output image to fill.
+     * Each componentn will be a value between [0 , 3] targeting one of the R/G/B/A channels of the dst image.
+     **/
+    void calcOpticalFlow(OFX::Image* ref,OFX::Image* other,const OfxRectI& renderWindow,std::vector<int> channelIndex[2],OFX::Image* dst);
+    
   private:
-    // do not need to delete these, the ImageEffect is managing them for us
-    OFX::Clip *maskClip_;
+    
+    ChoiceParam* _rChannel;
+    ChoiceParam* _gChannel;
+    ChoiceParam* _bChannel;
+    ChoiceParam* _aChannel;
+    
 };
+
+static IplImage* createLuminance8bitImage(OFX::Image* img,const OfxRectI& renderWindow)
+{
+    IplImage* cvImg = cvCreateImage(cvSize(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1), IPL_DEPTH_8U, 1);
+    
+    int srcRowElements = img->getRowBytes() / sizeof(float);
+    int dstRowElements = cvImg->widthStep;
+    
+    const float* src_pixels = (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1);
+    char* dst_pixels = cvImg->imageData;
+    
+    int nComps;
+    switch (img->getPixelComponents()) {
+        case OFX::ePixelComponentAlpha:
+            nComps = 1;
+            break;
+        case OFX::ePixelComponentRGB:
+            nComps = 3;
+            break;
+        case OFX::ePixelComponentRGBA:
+            nComps = 4;
+            break;
+        default:
+            assert(false);
+            break;
+    }
+    
+    for (int y = 0; y < cvImg->height; ++y, src_pixels += (srcRowElements) - cvImg->width * nComps, dst_pixels += (dstRowElements) - cvImg->width ) {
+        
+        for (int x = 0; x < cvImg->width; ++x,src_pixels += nComps, ++dst_pixels) {
+            
+            if (nComps == 1) {
+                *dst_pixels = OFX::Color::floatToInt<256>(*src_pixels);
+            } else {
+                double r = src_pixels[0];
+                double g = src_pixels[1];
+                double b = src_pixels[2];
+                *dst_pixels = OFX::Color::floatToInt<256>(0.299 * r + 0.587 * g + 0.114 * b);
+            }
+        }
+    }
+    return cvImg;
+}
+
+void
+VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,OFX::Image* other,const OfxRectI& renderWindow,std::vector<int> channelIndex[2],OFX::Image* dst)
+{
+    assert(dst->getPixelComponents() == OFX::ePixelComponentRGBA);
+    
+    IplImage* srcRefCVImg = createLuminance8bitImage(ref, renderWindow);
+    IplImage* srcNextCVImg = createLuminance8bitImage(other, renderWindow);
+    
+    cv::Mat srcRefMatImg(srcRefCVImg, false /*copyData*/);
+    cv::Mat srcNextMatImg(srcNextCVImg, false /*copyData*/);
+    
+    
+    assert(srcRefMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcRefMatImg.cols == (renderWindow.x2 - renderWindow.x1));
+    assert(srcNextMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcNextMatImg.cols == (renderWindow.x2 - renderWindow.x1));
+    
+    cv::Mat flow(srcRefMatImg.rows,srcRefMatImg.cols,CV_32FC2);
+
+    int nbLevels = 3;
+    double pyrScale = 0.5;
+    int nbIterations = 15;
+    int polyN = 5;
+    int polySigma = 1.1;
+    int winSize = 3;
+    calcOpticalFlowFarneback(srcRefMatImg, srcNextMatImg, flow, pyrScale, nbLevels, winSize, nbIterations, polyN, polySigma, 0);
+    
+    IplImage flowImg = (IplImage)flow;
+    
+    assert(flowImg.imageSize >= (flow.rows * flow.cols * sizeof(float) * 2));
+    
+    int dstElemCount = dst->getRowBytes() / sizeof(float);
+    int flowElemCount = flowImg.widthStep / sizeof(float);
+    
+    float* dst_pixels = (float*)dst->getPixelAddress(renderWindow.x1, renderWindow.y1);
+    const float* src_pixels = reinterpret_cast<const float*>(flowImg.imageData);
+    assert(dst_pixels && src_pixels);
+
+    
+    for (int y = 0; y < flowImg.height; ++y) {
+        for (int x = 0; x < flowImg.width; ++x) {
+            
+            for (int coord = 0; coord < 2; ++coord) {
+                
+                for (int k = 0; k < channelIndex[coord].size(); ++k) {
+                    assert(channelIndex[coord][k] >= 0 && channelIndex[coord][k] <= 3);
+                    dst_pixels[x * 4 + channelIndex[coord][k]] = src_pixels[x * 2 + coord];
+                }
+                
+            }
+        }
+        dst_pixels += dstElemCount;
+        src_pixels += flowElemCount;
+    }
+    
+    cvReleaseImage(&srcRefCVImg);
+    cvReleaseImage(&srcNextCVImg);
+}
 
 // the overridden render function
 void
 VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
 {
-    // instantiate the render code based on the pixel depth of the dst clip
-    OFX::BitDepthEnum       dstBitDepth    = dstClip_->getPixelDepth();
-    OFX::PixelComponentEnum dstComponents  = dstClip_->getPixelComponents();
 
+    std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
+    if (!dst.get()) {
+        OFX::throwSuiteStatusException(kOfxStatFailed);
+    }
+    if (dst->getRenderScale().x != args.renderScale.x ||
+        dst->getRenderScale().y != args.renderScale.y ||
+        dst->getField() != args.fieldToRender) {
+        setPersistentMessage(OFX::Message::eMessageError, "", "OFX Host gave image with wrong scale or field properties");
+        OFX::throwSuiteStatusException(kOfxStatFailed);
+    }
+    
+    //Original source image at current time
+    std::auto_ptr<OFX::Image> srcRef(srcClip_->fetchImage(args.time));
+    
+    if (!srcRef.get()) {
+        OFX::throwSuiteStatusException(kOfxStatFailed);
+    }
+    
+    {
+        OFX::BitDepthEnum dstBitDepth       = dst->getPixelDepth();
+        OFX::PixelComponentEnum dstComponents  = dst->getPixelComponents();
+        OFX::BitDepthEnum    srcBitDepth      = srcRef->getPixelDepth();
+        OFX::PixelComponentEnum srcComponents = srcRef->getPixelComponents();
+        if (srcBitDepth != dstBitDepth || srcComponents != dstComponents)
+            OFX::throwSuiteStatusException(kOfxStatFailed);
+        
+    }
+
+   
+    int rChannel,bChannel,gChannel,aChannel;
+    _rChannel->getValue(rChannel);
+    _rChannel->getValue(gChannel);
+    _rChannel->getValue(bChannel);
+    _rChannel->getValue(aChannel);
+    
+    bool backwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
+    bool forwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
+
+    if (backwardNeeded) {
+        
+        //Other image for "backward" optical flow computation
+        std::auto_ptr<OFX::Image> srcPrev(srcClip_->fetchImage(args.time - 1));
+        if (!srcPrev.get()) {
+            OFX::throwSuiteStatusException(kOfxStatFailed);
+        }
+        {
+            OFX::BitDepthEnum dstBitDepth       = dst->getPixelDepth();
+            OFX::PixelComponentEnum dstComponents  = dst->getPixelComponents();
+            OFX::BitDepthEnum    srcBitDepth      = srcPrev->getPixelDepth();
+            OFX::PixelComponentEnum srcComponents = srcPrev->getPixelComponents();
+            if (srcBitDepth != dstBitDepth || srcComponents != dstComponents)
+                OFX::throwSuiteStatusException(kOfxStatFailed);
+            
+        }
+        
+        std::vector<int> channelIndex[2];
+        channelIndex[0] = std::vector<int>();
+        channelIndex[1] = std::vector<int>();
+        if (rChannel == 1) {
+            channelIndex[0].push_back(0);
+        }
+        if (gChannel == 1) {
+            channelIndex[0].push_back(1);
+        }
+        if (bChannel == 1) {
+            channelIndex[0].push_back(2);
+        }
+        if (aChannel == 1) {
+            channelIndex[0].push_back(3);
+        }
+        
+        if (rChannel == 2) {
+            channelIndex[1].push_back(0);
+        }
+        if (gChannel == 2) {
+            channelIndex[1].push_back(1);
+        }
+        if (bChannel == 2) {
+            channelIndex[1].push_back(2);
+        }
+        if (aChannel == 2) {
+            channelIndex[1].push_back(3);
+        }
+
+        calcOpticalFlow(srcRef.get(), srcPrev.get(), args.renderWindow, channelIndex, dst.get());
+    }
+    
+    if (forwardNeeded) {
+        //Other image for "backward" optical flow computation
+        std::auto_ptr<OFX::Image> srcNext(srcClip_->fetchImage(args.time + 1));
+        if (!srcNext.get()) {
+            OFX::throwSuiteStatusException(kOfxStatFailed);
+        }
+        {
+            OFX::BitDepthEnum dstBitDepth       = dst->getPixelDepth();
+            OFX::PixelComponentEnum dstComponents  = dst->getPixelComponents();
+            OFX::BitDepthEnum    srcBitDepth      = srcNext->getPixelDepth();
+            OFX::PixelComponentEnum srcComponents = srcNext->getPixelComponents();
+            if (srcBitDepth != dstBitDepth || srcComponents != dstComponents)
+                OFX::throwSuiteStatusException(kOfxStatFailed);
+            
+        }
+        
+        std::vector<int> channelIndex[2];
+        channelIndex[0] = std::vector<int>();
+        channelIndex[1] = std::vector<int>();
+        if (rChannel == 3) {
+            channelIndex[0].push_back(0);
+        }
+        if (gChannel == 3) {
+            channelIndex[0].push_back(1);
+        }
+        if (bChannel == 3) {
+            channelIndex[0].push_back(2);
+        }
+        if (aChannel == 3) {
+            channelIndex[0].push_back(3);
+        }
+        
+        if (rChannel == 4) {
+            channelIndex[1].push_back(0);
+        }
+        if (gChannel == 4) {
+            channelIndex[1].push_back(1);
+        }
+        if (bChannel == 4) {
+            channelIndex[1].push_back(2);
+        }
+        if (aChannel == 4) {
+            channelIndex[1].push_back(3);
+        }
+        
+        calcOpticalFlow(srcRef.get(), srcNext.get(), args.renderWindow, channelIndex, dst.get());
+    }
 }
 
 mDeclarePluginFactory(VectorGeneratorPluginFactory, {}, {});
@@ -133,22 +406,79 @@ void VectorGeneratorPluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 
 void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
 {
-    genericCVDescribeInContextBegin(kSupportsTiles, desc, context);
 
-
-    if (context == eContextGeneral || context == eContextPaint) {
-        ClipDescriptor *maskClip = context == eContextGeneral ? desc.defineClip("Mask") : desc.defineClip("Brush");
-        maskClip->addSupportedComponent(ePixelComponentAlpha);
-        maskClip->setTemporalClipAccess(false);
-        if (context == eContextGeneral) {
-            maskClip->setOptional(true);
-        }
-        maskClip->setSupportsTiles(kSupportsTiles);
-        maskClip->setIsMask(true);
-    }
-
+    // Source clip only in the filter context
+    // create the mandated source clip
+    ClipDescriptor *srcClip = desc.defineClip(kOfxImageEffectSimpleSourceClipName);
+    srcClip->addSupportedComponent(ePixelComponentRGBA);
+    srcClip->addSupportedComponent(ePixelComponentRGB);
+    srcClip->setTemporalClipAccess(false);
+    srcClip->setSupportsTiles(kSupportsTiles);
+    srcClip->setIsMask(false);
+    
+    // create the mandated output clip
+    ClipDescriptor *dstClip = desc.defineClip(kOfxImageEffectOutputClipName);
+    dstClip->addSupportedComponent(ePixelComponentRGBA);
+    dstClip->setSupportsTiles(kSupportsTiles);
+ 
+    
     // make some pages and to things in
     PageParamDescriptor *page = desc.definePageParam("Controls");
+    
+    {
+        ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamRChannel);
+        param->setLabels(kParamRChannelLabel, kParamRChannelLabel, kParamRChannelLabel);
+        param->setHint(kParamRChannelHint);
+        param->appendOption(kChannelNone);
+        param->appendOption(kChannelBackwardU);
+        param->appendOption(kChannelBackwardV);
+        param->appendOption(kChannelForwardU);
+        param->appendOption(kChannelForwardV);
+        param->setDefault(1);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    {
+        ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamGChannel);
+        param->setLabels(kParamGChannelLabel, kParamGChannelLabel, kParamGChannelLabel);
+        param->setHint(kParamGChannelHint);
+        param->appendOption(kChannelNone);
+        param->appendOption(kChannelBackwardU);
+        param->appendOption(kChannelBackwardV);
+        param->appendOption(kChannelForwardU);
+        param->appendOption(kChannelForwardV);
+        param->setDefault(2);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    {
+        ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamBChannel);
+        param->setLabels(kParamBChannelLabel, kParamBChannelLabel, kParamBChannelLabel);
+        param->setHint(kParamBChannelHint);
+        param->appendOption(kChannelNone);
+        param->appendOption(kChannelBackwardU);
+        param->appendOption(kChannelBackwardV);
+        param->appendOption(kChannelForwardU);
+        param->appendOption(kChannelForwardV);
+        param->setDefault(3);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    {
+        ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamAChannel);
+        param->setLabels(kParamAChannelLabel, kParamAChannelLabel, kParamAChannelLabel);
+        param->setHint(kParamAChannelHint);
+        param->appendOption(kChannelNone);
+        param->appendOption(kChannelBackwardU);
+        param->appendOption(kChannelBackwardV);
+        param->appendOption(kChannelForwardU);
+        param->appendOption(kChannelForwardV);
+        param->setDefault(4);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
 
 }
 

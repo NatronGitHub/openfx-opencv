@@ -61,6 +61,9 @@ public:
     void initialise(OFX::ImageEffect* instance,const OfxRectI& bounds,int nComps);
     
     unsigned char* getData() const;
+    
+    IplImage* getIplImage() const { return _cvImgHeader; }
+    
 private:
     
     IplImage* _cvImgHeader;
@@ -103,6 +106,5 @@ void genericCVDescribe(const std::string& pluginName,const std::string& pluginGr
                        OFX::RenderSafetyEnum threadSafety,
                        OFX::ImageEffectDescriptor& desc);
 
-void genericCVDescribeInContextBegin(bool supportsTiles,OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context);
 
 #endif /* defined(__opencv2fx__GenericCVPlugin__) */

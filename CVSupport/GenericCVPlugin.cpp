@@ -50,18 +50,17 @@ CVImageWrapper::CVImageWrapper()
 void
 CVImageWrapper::initialise(OFX::ImageEffect* instance,const OfxRectI& bounds,int nComps)
 {
-    _mem.reset(new ImageMemory((bounds.x2 - bounds.x1) * (bounds.y2 - bounds.y1) * sizeof(unsigned char) * nComps,instance));
-    
     CvSize imageSize = cvSize(bounds.x2 - bounds.x1,
                               bounds.y2 - bounds.y1);
     
-
+    
     _cvImgHeader = cvCreateImageHeader(imageSize,
                                        IPL_DEPTH_8U,
                                        nComps);
+
+    _mem.reset(new ImageMemory(_cvImgHeader->imageSize,instance));
     
     _cvImgHeader->imageData = (char*) _mem->lock();
-    _cvImgHeader->widthStep = bounds.x2 - bounds.x1;
 
 }
 
@@ -114,7 +113,7 @@ GenericCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool 
     }
 
     
-    cvImg->initialise(this, renderWindow, pixelComponents);
+    cvImg->initialise(this, renderWindow, nChannels);
     
 
     
@@ -199,27 +198,5 @@ genericCVDescribe(const std::string& pluginName,const std::string& pluginGroupin
     desc.setRenderThreadSafety(threadSafety);
 }
 
-void
-genericCVDescribeInContextBegin(bool supportsTiles,OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
-{
-    // Source clip only in the filter context
-    // create the mandated source clip
-    ClipDescriptor *srcClip = desc.defineClip(kOfxImageEffectSimpleSourceClipName);
-    srcClip->addSupportedComponent(ePixelComponentRGBA);
-    srcClip->addSupportedComponent(ePixelComponentRGB);
-    srcClip->addSupportedComponent(ePixelComponentAlpha);
-    srcClip->setTemporalClipAccess(false);
-    srcClip->setSupportsTiles(supportsTiles);
-    srcClip->setIsMask(false);
-    
-    // create the mandated output clip
-    ClipDescriptor *dstClip = desc.defineClip(kOfxImageEffectOutputClipName);
-    dstClip->addSupportedComponent(ePixelComponentRGBA);
-    dstClip->addSupportedComponent(ePixelComponentRGB);
-    dstClip->addSupportedComponent(ePixelComponentAlpha);
-    dstClip->setSupportsTiles(supportsTiles);
-
- 
-}
 
 
