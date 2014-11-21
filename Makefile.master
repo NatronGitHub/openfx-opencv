@@ -1,0 +1,8 @@
+PATHTOROOT = ../openfx/Support
+
+include $(PATHTOROOT)/Plugins/Makefile.master
+
+CXXFLAGS += -DOFX_EXTENSIONS_VEGAS -DOFX_EXTENSIONS_NUKE
+
+CXXFLAGS += -I../OpenCV -I../SupportExt
+VPATH += ../OpenCV ../SupportExt

@@ -33,7 +33,7 @@
  Rocquencourt - B.P. 105
  78153 Le Chesnay Cedex - France
  */
-#include "GenericCVPlugin.h"
+#include "GenericOpenCVPlugin.h"
 #include "ofxsPixelProcessor.h"
 #include "ofxsLut.h"
 
@@ -75,7 +75,7 @@ CVImageWrapper::getData() const
     return (unsigned char*)_cvImgHeader->imageData;
 }
 
-GenericCVPlugin::GenericCVPlugin(OfxImageEffectHandle handle)
+GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
 : ImageEffect(handle)
 , dstClip_(0)
 , srcClip_(0)
@@ -86,7 +86,7 @@ GenericCVPlugin::GenericCVPlugin(OfxImageEffectHandle handle)
 }
 
 void
-GenericCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool copyData,CVImageWrapper* cvImg)
+GenericOpenCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool copyData,CVImageWrapper* cvImg)
 {
   
     void* pixelData = NULL;
@@ -135,7 +135,7 @@ GenericCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,bool 
 }
 
 void
-GenericCVPlugin::cvImageToOfxImage(OFX::Image* img,const OfxRectI& renderWindow,const CVImageWrapper& cvImg)
+GenericOpenCVPlugin::cvImageToOfxImage(OFX::Image* img,const OfxRectI& renderWindow,const CVImageWrapper& cvImg)
 {
     void* pixelData = NULL;
     OfxRectI bounds;

@@ -1,5 +1,5 @@
 /*
- OFX Clamp plugin.
+ OFX VectorGenerator plugin.
 
  Copyright (C) 2014 INRIA
 
@@ -72,7 +72,8 @@
  */
 
 
-#include "GenericCVPlugin.h"
+#include "GenericOpenCVPlugin.h"
+
 #include "ofxsLut.h"
 
 #define kPluginName "VectorGeneratorOFX"

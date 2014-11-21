@@ -1,5 +1,5 @@
 /*
- OFX Generic OpenCV plug-in plugin.
+ OFX Generic OpenCV plugin.
  
  Copyright (C) 2014 INRIA
  
@@ -34,13 +34,14 @@
  78153 Le Chesnay Cedex - France
  */
 
-#ifndef __opencv2fx__GenericCVPlugin__
-#define __opencv2fx__GenericCVPlugin__
+#ifndef __GenericOpenCVPlugin_h__
+#define __GenericOpenCVPlugin_h__
 
 #include "ofxsImageEffect.h"
 #include "ofxsMacros.h"
 
 #include <cv.h>
+
 namespace OFX
 {
     namespace Color {
@@ -70,11 +71,11 @@ private:
     std::auto_ptr<OFX::ImageMemory> _mem;
 };
 
-class GenericCVPlugin : public OFX::ImageEffect
+class GenericOpenCVPlugin : public OFX::ImageEffect
 {
 public:
     /** @brief ctor */
-    GenericCVPlugin(OfxImageEffectHandle handle);
+    GenericOpenCVPlugin(OfxImageEffectHandle handle);
     
 private:
     // override the roi call
@@ -107,4 +108,4 @@ void genericCVDescribe(const std::string& pluginName,const std::string& pluginGr
                        OFX::ImageEffectDescriptor& desc);
 
 
-#endif /* defined(__opencv2fx__GenericCVPlugin__) */
+#endif /* defined(__GenericOpenCVPlugin_h__) */
