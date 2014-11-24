@@ -123,14 +123,14 @@ GenericOpenCVPlugin::fetchCVImage(OFX::Image* img,const OfxRectI& renderWindow,b
         convertWindow.x1 = convertWindow.y1 = 0;
         convertWindow.x2 = renderWindow.x2 - renderWindow.x1;
         convertWindow.y2 = renderWindow.y2 - renderWindow.y1;
-        _srgbLut->to_byte_packed(cvImg->getData(),
-                                 (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1),
-                                 convertWindow,
-                                 nChannels,
-                                 bounds,
-                                 rowBytes,
-                                 renderWindow,
-                                 (renderWindow.x2 - renderWindow.x1) * sizeof(unsigned char) * nChannels);
+        _srgbLut->to_byte_packed_nodither(cvImg->getData(),
+                                          (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1),
+                                          convertWindow,
+                                          nChannels,
+                                          bounds,
+                                          rowBytes,
+                                          renderWindow,
+                                          (renderWindow.x2 - renderWindow.x1) * sizeof(unsigned char) * nChannels);
     }
 }
 
