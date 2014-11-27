@@ -116,6 +116,82 @@
 #define kParamMethodLabel "Method"
 #define kParamMethodHint ""
 
+#define kParamAdvanced "advanced"
+#define kParamAdvancedLabel "Advanced"
+
+
+//Farneback
+#define kParamLevels "levels"
+#define kParamLevelsLabel "Levels"
+#define kParamLevelsHint "Number of pyramid levels including initial image. If 1 that means no extra layer will be created and only the original images are used."
+
+//Farneback && Dual TV L1
+#define kParamIterations "iterations"
+#define kParamIterationsLabel "Iterations"
+#define kParamIterationsHint "Number of iterations the algorithm uses at each pyramid level"
+
+//Farneback
+#define kParamPixelNeighborhood "neighborhood"
+#define kParamPixelNeighborhoodLabel "Neighborhood"
+#define kParamPixelNeighborhoodHint "Size of the pixel neighborhood used to find the polynomial expansion in each pixel. Larger values mean that the image will " \
+"be approximated with smoother surfaces, yielding a more robust algorithm and more blurred motion field."
+
+//Farneback
+#define kParamSigma "sigma"
+#define kParamSigmaLabel "Sigma"
+#define kParamSigmaHint "Standard deviation of the Gaussian used to smooth derivatives used as a basis of the  polynomial expansion. For a Neighborhood of 5 " \
+"you can set Sigma to 1.1. For a Neighborhood of 7, a good value for sigma would be 1.5."
+
+//Simple flow
+#define kParamLayers "layers"
+#define kParamLayersLabel "Layers"
+#define kParamLayersHint "Recommendation for number of layers:\n" \
+" 4K         : 7 \n" \
+" 1080P      : 6 \n" \
+" 720P       : 5 \n"
+
+//Simple flow
+#define kParamBlockSize "blockSize"
+#define kParamBlockSizeLabel "Block Size"
+#define kParamBlockSizeHint "Size of pixels block through which we sum up when calculating cost function for each pixel"
+
+//Simple flow
+#define kParamMaxFlow "maxFlow"
+#define kParamMaxFlowLabel "Max flow"
+#define kParamMaxFlowHint "Maximum flow that we search at each level"
+
+//Dual TV L1
+#define kParamTau "tau"
+#define kParamTauLabel "Tau"
+#define kParamTauHint "Time step of the numerical scheme"
+
+//Dual TV L1
+#define kParamLambda "lambda"
+#define kParamLambdaLabel "Lambda"
+#define kParamLambdaHint "This determines the smoothness of the output. The smaller the parameter is, the smoother the solutions we obtain."
+
+//Dual TV L1
+#define kParamTheta "theta"
+#define kParamThetaLabel "Theta"
+#define kParamThetaHint "It serves as a link between the attachment and the regularization terms. It should have a small value in order to maintain both parts in " \
+"correspondance."
+
+//Dual TV L1
+#define kParamNScales "nScales"
+#define kParamNScalesLabel "N. Scales"
+#define kParamNScalesHint "Number of scales used to create the pyramid image"
+
+//Dual TV L1
+#define kParamWarps "warps"
+#define kParamWarpsLabel "Warps"
+#define kParamWarpsHint "Number of warpings per scale. This affects the stability of the method at the expense of running time."
+
+//Dual TV L1
+#define kParamEpsilon "epsilon"
+#define kParamEpsilonLabel "Epsilon"
+#define kParamEpsilonHint "Stopping criterion theshold which is a trade-off between accuracy and running time. A small value will yield more accurate solutions."
+
+
 enum OpticalFlowMethodEnum
 {
     eOpticalFlowFarneback = 0,
@@ -254,12 +330,8 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,OFX::Image* other, const 
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
         
-        // Recommendation for number of layers:
-        // 4K         : 7
-        // 1080P      : 6
-        // 720P       : 5
-        // Middlebury : 3-4
-        int nbLayers = 5;
+        
+        int nbLayers = 3;
         int avgBlockSize = 2;
         int maxFlow = 4;
         
@@ -538,7 +610,146 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         page->addChild(*param);
     }
     
+    //Farneback
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamLevels);
+        param->setLabels(kParamLevelsLabel, kParamLevelsLabel, kParamLevelsLabel);
+        param->setHint(kParamLevelsHint);
+        param->setDefault(3);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Farneback @ Dual TV L1
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamIterations);
+        param->setLabels(kParamIterationsLabel, kParamIterationsLabel, kParamIterationsLabel);
+        param->setHint(kParamIterationsHint);
+        param->setDefault(15);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Farneback
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamPixelNeighborhood);
+        param->setLabels(kParamPixelNeighborhoodLabel, kParamPixelNeighborhoodLabel, kParamPixelNeighborhoodLabel);
+        param->setHint(kParamPixelNeighborhoodHint);
+        param->setDefault(5);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Farneback
+    {
+        DoubleParamDescriptor *param = desc.defineDoubleParam(kParamSigma);
+        param->setLabels(kParamSigmaLabel, kParamSigmaLabel, kParamSigmaLabel);
+        param->setHint(kParamSigmaHint);
+        param->setDefault(1.1);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Simple flow
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
+        param->setLabels(kParamLayersLabel, kParamLayersLabel, kParamLayersLabel);
+        param->setHint(kParamLayersHint);
+        param->setDefault(3);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Simple flow
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
+        param->setLabels(kParamLayersLabel, kParamLayersLabel, kParamLayersLabel);
+        param->setHint(kParamLayersHint);
+        param->setDefault(3);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Simple flow
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamBlockSize);
+        param->setLabels(kParamBlockSizeLabel, kParamBlockSizeLabel, kParamBlockSizeLabel);
+        param->setHint(kParamBlockSizeHint);
+        param->setDefault(2);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Simple flow
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamMaxFlow);
+        param->setLabels(kParamMaxFlowLabel, kParamMaxFlowLabel, kParamMaxFlowLabel);
+        param->setHint(kParamMaxFlowHint);
+        param->setDefault(4);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Dual TV L1
+    {
+        DoubleParamDescriptor *param = desc.defineDoubleParam(kParamTau);
+        param->setLabels(kParamTauLabel, kParamTauLabel, kParamTauLabel);
+        param->setHint(kParamTauHint);
+        param->setDefault(0.25);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Dual TV L1
+    {
+        DoubleParamDescriptor *param = desc.defineDoubleParam(kParamLambda);
+        param->setLabels(kParamLambdaLabel, kParamLambdaLabel, kParamLambdaLabel);
+        param->setHint(kParamLambdaHint);
+        param->setDefault(0.15);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Dual TV L1
+    {
+        DoubleParamDescriptor *param = desc.defineDoubleParam(kParamTheta);
+        param->setLabels(kParamThetaLabel, kParamThetaLabel, kParamThetaLabel);
+        param->setHint(kParamThetaHint);
+        param->setDefault(0.3);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Dual TV L1
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamNScales);
+        param->setLabels(kParamNScalesLabel, kParamNScalesLabel, kParamNScalesLabel);
+        param->setHint(kParamNScalesHint);
+        param->setDefault(5);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    
+    //Dual TV L1
+    {
+        IntParamDescriptor *param = desc.defineIntParam(kParamWarps);
+        param->setLabels(kParamWarpsLabel,kParamWarpsLabel, kParamWarpsLabel);
+        param->setHint(kParamWarpsHint);
+        param->setDefault(5);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
+    //Dual TV L1
+    {
+        DoubleParamDescriptor *param = desc.defineDoubleParam(kParamEpsilon);
+        param->setLabels(kParamEpsilonLabel, kParamEpsilonLabel, kParamEpsilonLabel);
+        param->setHint(kParamEpsilonHint);
+        param->setDefault(0.01);
+        param->setAnimates(true);
+        page->addChild(*param);
+    }
 
+    
 }
 
 OFX::ImageEffect* VectorGeneratorPluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
