@@ -1,12 +1,11 @@
 #include "VectorGenerator.h"
 
-namespace OFX
+namespace OFX {
+namespace Plugin {
+void
+getPluginIDs(OFX::PluginFactoryArray &ids)
 {
-    namespace Plugin
-    {
-        void getPluginIDs(OFX::PluginFactoryArray &ids)
-        {
-            getVectorGeneratorPluginID(ids);
-        }
-    }
+    getVectorGeneratorPluginID(ids);
+}
+}
 }

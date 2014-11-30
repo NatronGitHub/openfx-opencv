@@ -1,72 +1,72 @@
 /*
- OFX VectorGenerator plugin.
+   OFX VectorGenerator plugin.
 
- Copyright (C) 2014 INRIA
+   Copyright (C) 2014 INRIA
 
- Redistribution and use in source and binary forms, with or without modification,
- are permitted provided that the following conditions are met:
+   Redistribution and use in source and binary forms, with or without modification,
+   are permitted provided that the following conditions are met:
 
- Redistributions of source code must retain the above copyright notice, this
- list of conditions and the following disclaimer.
+   Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
- Redistributions in binary form must reproduce the above copyright notice, this
- list of conditions and the following disclaimer in the documentation and/or
- other materials provided with the distribution.
+   Redistributions in binary form must reproduce the above copyright notice, this
+   list of conditions and the following disclaimer in the documentation and/or
+   other materials provided with the distribution.
 
- Neither the name of the {organization} nor the names of its
- contributors may be used to endorse or promote products derived from
- this software without specific prior written permission.
+   Neither the name of the {organization} nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
- INRIA
- Domaine de Voluceau
- Rocquencourt - B.P. 105
- 78153 Le Chesnay Cedex - France
+   INRIA
+   Domaine de Voluceau
+   Rocquencourt - B.P. 105
+   78153 Le Chesnay Cedex - France
 
 
- The skeleton for this source file is from:
- OFX Invert Example plugin, a plugin that illustrates the use of the OFX Support library.
+   The skeleton for this source file is from:
+   OFX Invert Example plugin, a plugin that illustrates the use of the OFX Support library.
 
- Copyright (C) 2007 The Open Effects Association Ltd
- Author Bruno Nicoletti bruno@thefoundry.co.uk
+   Copyright (C) 2007 The Open Effects Association Ltd
+   Author Bruno Nicoletti bruno@thefoundry.co.uk
 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
 
  * Redistributions of source code must retain the above copyright notice,
- this list of conditions and the following disclaimer.
+   this list of conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright notice,
- this list of conditions and the following disclaimer in the documentation
- and/or other materials provided with the distribution.
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
  * Neither the name The Open Effects Association Ltd, nor the names of its
- contributors may be used to endorse or promote products derived from this
- software without specific prior written permission.
+   contributors may be used to endorse or promote products derived from this
+   software without specific prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+   ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
- The Open Effects Association Ltd
- 1 Wardour St
- London W1D 6PA
- England
+   The Open Effects Association Ltd
+   1 Wardour St
+   London W1D 6PA
+   England
 
 
  */
@@ -134,21 +134,21 @@
 #define kParamPixelNeighborhood "neighborhood"
 #define kParamPixelNeighborhoodLabel "Neighborhood"
 #define kParamPixelNeighborhoodHint "Size of the pixel neighborhood used to find the polynomial expansion in each pixel. Larger values mean that the image will " \
-"be approximated with smoother surfaces, yielding a more robust algorithm and more blurred motion field."
+    "be approximated with smoother surfaces, yielding a more robust algorithm and more blurred motion field."
 
 //Farneback
 #define kParamSigma "sigma"
 #define kParamSigmaLabel "Sigma"
 #define kParamSigmaHint "Standard deviation of the Gaussian used to smooth derivatives used as a basis of the  polynomial expansion. For a Neighborhood of 5 " \
-"you can set Sigma to 1.1. For a Neighborhood of 7, a good value for sigma would be 1.5."
+    "you can set Sigma to 1.1. For a Neighborhood of 7, a good value for sigma would be 1.5."
 
 //Simple flow
 #define kParamLayers "layers"
 #define kParamLayersLabel "Layers"
 #define kParamLayersHint "Recommendation for number of layers:\n" \
-" 4K         : 7 \n" \
-" 1080P      : 6 \n" \
-" 720P       : 5 \n"
+    " 4K         : 7 \n" \
+    " 1080P      : 6 \n" \
+    " 720P       : 5 \n"
 
 //Simple flow
 #define kParamBlockSize "blockSize"
@@ -174,7 +174,7 @@
 #define kParamTheta "theta"
 #define kParamThetaLabel "Theta"
 #define kParamThetaHint "It serves as a link between the attachment and the regularization terms. It should have a small value in order to maintain both parts in " \
-"correspondance."
+    "correspondance."
 
 //Dual TV L1
 #define kParamNScales "nScales"
@@ -202,17 +202,18 @@ enum OpticalFlowMethodEnum
 using namespace OFX;
 using namespace cv;
 
-class VectorGeneratorPlugin : public GenericOpenCVPlugin
+class VectorGeneratorPlugin
+    : public GenericOpenCVPlugin
 {
-  public:
+public:
     /** @brief ctor */
     VectorGeneratorPlugin(OfxImageEffectHandle handle)
-    : GenericOpenCVPlugin(handle)
-    , _rChannel(0)
-    , _gChannel(0)
-    , _bChannel(0)
-    , _aChannel(0)
-    , _method(0)
+        : GenericOpenCVPlugin(handle)
+          , _rChannel(0)
+          , _gChannel(0)
+          , _bChannel(0)
+          , _aChannel(0)
+          , _method(0)
     {
         _rChannel = fetchChoiceParam(kParamRChannel);
         _gChannel = fetchChoiceParam(kParamGChannel);
@@ -222,7 +223,7 @@ class VectorGeneratorPlugin : public GenericOpenCVPlugin
         assert(_rChannel && _gChannel && _bChannel && _aChannel);
     }
 
-  private:
+private:
     /* Override the render */
     virtual void render(const OFX::RenderArguments &args) OVERRIDE FINAL;
 
@@ -232,50 +233,46 @@ class VectorGeneratorPlugin : public GenericOpenCVPlugin
      * @param channelIndex[in] A vector for each coordinate (x,y) of components of the output image to fill.
      * Each componentn will be a value between [0 , 3] targeting one of the R/G/B/A channels of the dst image.
      **/
-    void calcOpticalFlow(OFX::Image* ref,OFX::Image* other,const OfxRectI& renderWindow,std::vector<int> channelIndex[2],
+    void calcOpticalFlow(OFX::Image* ref,OFX::Image* other,const OfxRectI & renderWindow,std::vector<int> channelIndex[2],
                          OpticalFlowMethodEnum method,OFX::Image* dst);
-    
-  private:
-    
+
+private:
+
     ChoiceParam* _rChannel;
     ChoiceParam* _gChannel;
     ChoiceParam* _bChannel;
     ChoiceParam* _aChannel;
-    
     ChoiceParam* _method;
-    
 };
 
-static IplImage* createLuminance8bitImage(OFX::Image* img,const OfxRectI& renderWindow)
+static IplImage*
+createLuminance8bitImage(OFX::Image* img,
+                         const OfxRectI & renderWindow)
 {
     IplImage* cvImg = cvCreateImage(cvSize(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1), IPL_DEPTH_8U, 1);
-    
     int srcRowElements = img->getRowBytes() / sizeof(float);
     int dstRowElements = cvImg->widthStep;
-    
     const float* src_pixels = (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1);
     char* dst_pixels = cvImg->imageData;
-    
     int nComps;
-    switch (img->getPixelComponents()) {
-        case OFX::ePixelComponentAlpha:
-            nComps = 1;
-            break;
-        case OFX::ePixelComponentRGB:
-            nComps = 3;
-            break;
-        case OFX::ePixelComponentRGBA:
-            nComps = 4;
-            break;
-        default:
-            assert(false);
-            break;
+
+    switch ( img->getPixelComponents() ) {
+    case OFX::ePixelComponentAlpha:
+        nComps = 1;
+        break;
+    case OFX::ePixelComponentRGB:
+        nComps = 3;
+        break;
+    case OFX::ePixelComponentRGBA:
+        nComps = 4;
+        break;
+    default:
+        assert(false);
+        break;
     }
-    
-    for (int y = 0; y < cvImg->height; ++y, src_pixels += (srcRowElements) - cvImg->width * nComps, dst_pixels += (dstRowElements) - cvImg->width ) {
-        
+
+    for (int y = 0; y < cvImg->height; ++y, src_pixels += (srcRowElements) - cvImg->width * nComps, dst_pixels += (dstRowElements) - cvImg->width) {
         for (int x = 0; x < cvImg->width; ++x,src_pixels += nComps, ++dst_pixels) {
-            
             if (nComps == 1) {
                 *dst_pixels = OFX::Color::floatToInt<256>(*src_pixels);
             } else {
@@ -286,66 +283,63 @@ static IplImage* createLuminance8bitImage(OFX::Image* img,const OfxRectI& render
             }
         }
     }
+
     return cvImg;
 }
 
 void
-VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,OFX::Image* other, const OfxRectI& renderWindow,std::vector<int> channelIndex[2],
-                                       OpticalFlowMethodEnum method,OFX::Image* dst)
+VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
+                                       OFX::Image* other,
+                                       const OfxRectI & renderWindow,
+                                       std::vector<int> channelIndex[2],
+                                       OpticalFlowMethodEnum method,
+                                       OFX::Image* dst)
 {
     assert(dst->getPixelComponents() == OFX::ePixelComponentRGBA);
-    
-   
+
+
     cv::Mat flow(renderWindow.x2 - renderWindow.x1,renderWindow.y2 - renderWindow.y1,CV_32FC2);
 
     if (method == eOpticalFlowFarneback) {
-        
         IplImage* srcRefCVImg = createLuminance8bitImage(ref, renderWindow);
         IplImage* srcNextCVImg = createLuminance8bitImage(other, renderWindow);
-        
         cv::Mat srcRefMatImg(srcRefCVImg, false /*copyData*/);
         cv::Mat srcNextMatImg(srcNextCVImg, false /*copyData*/);
-        
-        
-        assert(srcRefMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcRefMatImg.cols == (renderWindow.x2 - renderWindow.x1));
-        assert(srcNextMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcNextMatImg.cols == (renderWindow.x2 - renderWindow.x1));
-        
+
+
+        assert( srcRefMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcRefMatImg.cols == (renderWindow.x2 - renderWindow.x1) );
+        assert( srcNextMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcNextMatImg.cols == (renderWindow.x2 - renderWindow.x1) );
+
         int nbLevels = 3;
         double pyrScale = 0.5;
         int nbIterations = 15;
         int polyN = 5;
         int polySigma = 1.1;
         int winSize = 3;
-        
+
         calcOpticalFlowFarneback(srcRefMatImg, srcNextMatImg, flow, pyrScale, nbLevels, winSize, nbIterations, polyN, polySigma, 0);
-        
+
         cvReleaseImage(&srcRefCVImg);
         cvReleaseImage(&srcNextCVImg);
     } else if (method == eOpticalFlowSimpleFlow) {
-        
         CVImageWrapper srcRef,srcNext;
         fetchCVImage(ref, renderWindow, true, &srcRef);
         fetchCVImage(other, renderWindow, true, &srcNext);
-        
+
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
-        
-        
         int nbLayers = 3;
         int avgBlockSize = 2;
         int maxFlow = 4;
-        
+
         calcOpticalFlowSF(srcRefMatImg, srcNextMatImg, flow, nbLayers, avgBlockSize, maxFlow);
-       
     } else if (method == eOpticalFlowDualTVL1) {
-    
         IplImage* srcRefCVImg = createLuminance8bitImage(ref, renderWindow);
         IplImage* srcNextCVImg = createLuminance8bitImage(other, renderWindow);
-        
         cv::Mat srcRefMatImg(srcRefCVImg, false /*copyData*/);
         cv::Mat srcNextMatImg(srcNextCVImg, false /*copyData*/);
 
-        
+
         Ptr<DenseOpticalFlow> tvl1 = createOptFlow_DualTVL1();
         tvl1->set("tau", 0.25);
         tvl1->set("lambda", 0.15);
@@ -355,88 +349,80 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,OFX::Image* other, const 
         tvl1->set("epsilon", 0.01);
         tvl1->set("iterations", 300);
         tvl1->calc(srcRefMatImg,srcNextMatImg,flow);
-        
-        
+
+
         cvReleaseImage(&srcRefCVImg);
         cvReleaseImage(&srcNextCVImg);
     }
-    
+
     IplImage flowImg = (IplImage)flow;
-    
-    assert(flowImg.imageSize >= (flow.rows * flow.cols * sizeof(float) * 2));
-    
+
+    assert( flowImg.imageSize >= (flow.rows * flow.cols * sizeof(float) * 2) );
+
     int dstElemCount = dst->getRowBytes() / sizeof(float);
     int flowElemCount = flowImg.widthStep / sizeof(float);
-    
     float* dst_pixels = (float*)dst->getPixelAddress(renderWindow.x1, renderWindow.y1);
     const float* src_pixels = reinterpret_cast<const float*>(flowImg.imageData);
     assert(dst_pixels && src_pixels);
 
-    
+
     for (int y = 0; y < flowImg.height; ++y) {
         for (int x = 0; x < flowImg.width; ++x) {
-            
             for (int coord = 0; coord < 2; ++coord) {
-                
                 for (int k = 0; k < channelIndex[coord].size(); ++k) {
                     assert(channelIndex[coord][k] >= 0 && channelIndex[coord][k] <= 3);
                     dst_pixels[x * 4 + channelIndex[coord][k]] = src_pixels[x * 2 + coord];
                 }
-                
             }
         }
         dst_pixels += dstElemCount;
         src_pixels += flowElemCount;
     }
-    
-    
-}
+} // calcOpticalFlow
 
 // the overridden render function
 void
 VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
 {
+    std::auto_ptr<OFX::Image> dst( dstClip_->fetchImage(args.time) );
 
-    std::auto_ptr<OFX::Image> dst(dstClip_->fetchImage(args.time));
-    if (!dst.get()) {
+    if ( !dst.get() ) {
         OFX::throwSuiteStatusException(kOfxStatFailed);
     }
-    if (dst->getRenderScale().x != args.renderScale.x ||
-        dst->getRenderScale().y != args.renderScale.y ||
-        dst->getField() != args.fieldToRender) {
+    if ( (dst->getRenderScale().x != args.renderScale.x) ||
+         ( dst->getRenderScale().y != args.renderScale.y) ||
+         ( dst->getField() != args.fieldToRender) ) {
         setPersistentMessage(OFX::Message::eMessageError, "", "OFX Host gave image with wrong scale or field properties");
         OFX::throwSuiteStatusException(kOfxStatFailed);
     }
-    
+
     //Original source image at current time
-    std::auto_ptr<OFX::Image> srcRef(srcClip_->fetchImage(args.time));
-    
-    if (!srcRef.get()) {
+    std::auto_ptr<OFX::Image> srcRef( srcClip_->fetchImage(args.time) );
+
+    if ( !srcRef.get() ) {
         OFX::throwSuiteStatusException(kOfxStatFailed);
     }
-    
-   
+
+
     int rChannel,bChannel,gChannel,aChannel;
     _rChannel->getValue(rChannel);
     _gChannel->getValue(gChannel);
     _bChannel->getValue(bChannel);
     _aChannel->getValue(aChannel);
-    
+
     bool backwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
     bool forwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
-
     int method_i;
     _method->getValue(method_i);
     OpticalFlowMethodEnum method = (OpticalFlowMethodEnum)method_i;
-    
+
     if (backwardNeeded) {
-        
         //Other image for "backward" optical flow computation
-        std::auto_ptr<OFX::Image> srcPrev(srcClip_->fetchImage(args.time - 1));
-        if (!srcPrev.get()) {
+        std::auto_ptr<OFX::Image> srcPrev( srcClip_->fetchImage(args.time - 1) );
+        if ( !srcPrev.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
-        
+
         std::vector<int> channelIndex[2];
         channelIndex[0] = std::vector<int>();
         channelIndex[1] = std::vector<int>();
@@ -452,7 +438,7 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
         if (aChannel == 1) {
             channelIndex[0].push_back(3);
         }
-        
+
         if (rChannel == 2) {
             channelIndex[1].push_back(0);
         }
@@ -466,17 +452,17 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
             channelIndex[1].push_back(3);
         }
 
-        calcOpticalFlow(srcRef.get(), srcPrev.get(),  args.renderWindow, channelIndex, method, dst.get());
+        calcOpticalFlow( srcRef.get(), srcPrev.get(),  args.renderWindow, channelIndex, method, dst.get() );
     }
-    
+
     if (forwardNeeded) {
         //Other image for "backward" optical flow computation
-        std::auto_ptr<OFX::Image> srcNext(srcClip_->fetchImage(args.time + 1));
-        if (!srcNext.get()) {
+        std::auto_ptr<OFX::Image> srcNext( srcClip_->fetchImage(args.time + 1) );
+        if ( !srcNext.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
-   
-        
+
+
         std::vector<int> channelIndex[2];
         channelIndex[0] = std::vector<int>();
         channelIndex[1] = std::vector<int>();
@@ -492,7 +478,7 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
         if (aChannel == 3) {
             channelIndex[0].push_back(3);
         }
-        
+
         if (rChannel == 4) {
             channelIndex[1].push_back(0);
         }
@@ -505,42 +491,44 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
         if (aChannel == 4) {
             channelIndex[1].push_back(3);
         }
-        
-        calcOpticalFlow(srcRef.get(), srcNext.get(), args.renderWindow, channelIndex, method, dst.get());
-    }
-}
 
-mDeclarePluginFactory(VectorGeneratorPluginFactory, {}, {});
+        calcOpticalFlow( srcRef.get(), srcNext.get(), args.renderWindow, channelIndex, method, dst.get() );
+    }
+} // render
+
+mDeclarePluginFactory(VectorGeneratorPluginFactory, {}, {}
+                      );
 
 using namespace OFX;
-void VectorGeneratorPluginFactory::describe(OFX::ImageEffectDescriptor &desc)
+void
+VectorGeneratorPluginFactory::describe(OFX::ImageEffectDescriptor &desc)
 {
-    
     genericCVDescribe(kPluginName, kPluginGrouping, kPluginDescription, kSupportsTiles, kSupportsMultiResolution, true, kRenderThreadSafety, desc);
-
 }
 
-void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc, OFX::ContextEnum context)
+void
+VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc,
+                                                OFX::ContextEnum context)
 {
-
     // Source clip only in the filter context
     // create the mandated source clip
     ClipDescriptor *srcClip = desc.defineClip(kOfxImageEffectSimpleSourceClipName);
+
     //srcClip->addSupportedComponent(ePixelComponentRGBA);
     srcClip->addSupportedComponent(ePixelComponentRGB);
     srcClip->setTemporalClipAccess(false);
     srcClip->setSupportsTiles(kSupportsTiles);
     srcClip->setIsMask(false);
-    
+
     // create the mandated output clip
     ClipDescriptor *dstClip = desc.defineClip(kOfxImageEffectOutputClipName);
     dstClip->addSupportedComponent(ePixelComponentRGBA);
     dstClip->setSupportsTiles(kSupportsTiles);
- 
-    
+
+
     // make some pages and to things in
     PageParamDescriptor *page = desc.definePageParam("Controls");
-    
+
     {
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamRChannel);
         param->setLabels(kParamRChannelLabel, kParamRChannelLabel, kParamRChannelLabel);
@@ -554,7 +542,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     {
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamGChannel);
         param->setLabels(kParamGChannelLabel, kParamGChannelLabel, kParamGChannelLabel);
@@ -594,7 +582,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     {
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamMethod);
         param->setLabels(kParamMethodLabel, kParamMethodLabel, kParamMethodLabel);
@@ -609,7 +597,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(false);
         page->addChild(*param);
     }
-    
+
     //Farneback
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamLevels);
@@ -619,7 +607,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Farneback @ Dual TV L1
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamIterations);
@@ -629,7 +617,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Farneback
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamPixelNeighborhood);
@@ -639,7 +627,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Farneback
     {
         DoubleParamDescriptor *param = desc.defineDoubleParam(kParamSigma);
@@ -649,7 +637,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
@@ -659,7 +647,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
@@ -669,7 +657,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamBlockSize);
@@ -679,7 +667,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamMaxFlow);
@@ -689,7 +677,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Dual TV L1
     {
         DoubleParamDescriptor *param = desc.defineDoubleParam(kParamTau);
@@ -699,7 +687,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Dual TV L1
     {
         DoubleParamDescriptor *param = desc.defineDoubleParam(kParamLambda);
@@ -709,7 +697,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Dual TV L1
     {
         DoubleParamDescriptor *param = desc.defineDoubleParam(kParamTheta);
@@ -719,7 +707,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Dual TV L1
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamNScales);
@@ -729,7 +717,7 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
-    
+
     //Dual TV L1
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamWarps);
@@ -748,19 +736,20 @@ void VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor 
         param->setAnimates(true);
         page->addChild(*param);
     }
+} // describeInContext
 
-    
-}
-
-OFX::ImageEffect* VectorGeneratorPluginFactory::createInstance(OfxImageEffectHandle handle, OFX::ContextEnum /*context*/)
+OFX::ImageEffect*
+VectorGeneratorPluginFactory::createInstance(OfxImageEffectHandle handle,
+                                             OFX::ContextEnum /*context*/)
 {
     return new VectorGeneratorPlugin(handle);
 }
 
-
-void getVectorGeneratorPluginID(OFX::PluginFactoryArray &ids)
+void
+getVectorGeneratorPluginID(OFX::PluginFactoryArray &ids)
 {
     static VectorGeneratorPluginFactory p(kPluginIdentifier, kPluginVersionMajor, kPluginVersionMinor);
+
     ids.push_back(&p);
 }
 
