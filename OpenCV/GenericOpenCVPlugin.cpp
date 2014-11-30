@@ -137,6 +137,39 @@ GenericOpenCVPlugin::fetchCVImage(const OFX::Image* img,
 }
 
 void
+GenericOpenCVPlugin::fetchCVImageGrayscale(const OFX::Image* img,
+                                           const OfxRectI & renderWindow,
+                                           bool copyData,
+                                           CVImageWrapper* cvImg)
+{
+    const void* pixelData = NULL;
+    OfxRectI bounds;
+    OFX::PixelComponentEnum pixelComponents;
+    OFX::BitDepthEnum bitDepth;
+    int rowBytes;
+
+    getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
+    assert(pixelComponents == ePixelComponentRGBA || pixelComponents == ePixelComponentRGB);
+    const OfxRectI &dstBounds = renderWindow;
+    const OFX::PixelComponentEnum dstPixelComponents = ePixelComponentAlpha;
+    const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
+
+    cvImg->initialize(this, dstBounds, dstPixelComponents, dstBitDepth);
+    unsigned char* dstPixelData = cvImg->getData();
+    int dstRowBytes = cvImg->getIplImage()->widthStep;
+
+    if (copyData) {
+        OfxRectI convertWindow;
+        convertWindow.x1 = convertWindow.y1 = 0;
+        convertWindow.x2 = renderWindow.x2 - renderWindow.x1;
+        convertWindow.y2 = renderWindow.y2 - renderWindow.y1;
+        _srgbLut->to_byte_grayscale_nodither(pixelData, bounds, pixelComponents, bitDepth, rowBytes,
+                                             renderWindow,
+                                             dstPixelData, dstBounds, dstPixelComponents, dstBitDepth, dstRowBytes);
+    }
+}
+
+void
 GenericOpenCVPlugin::cvImageToOfxImage(const CVImageWrapper & cvImg,
                                        const OfxRectI & renderWindow,
                                        OFX::Image* dstImg)

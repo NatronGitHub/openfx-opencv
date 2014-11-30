@@ -94,6 +94,8 @@ protected:
 
     void fetchCVImage(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* cvImg);
 
+    void fetchCVImageGrayscale(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* cvImg);
+
     void cvImageToOfxImage(const CVImageWrapper & cvImg, const OfxRectI & renderWindow, OFX::Image* img);
 
     // do not need to delete these, the ImageEffect is managing them for us

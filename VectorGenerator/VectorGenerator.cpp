@@ -298,18 +298,17 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
     assert(dst->getPixelComponents() == OFX::ePixelComponentRGBA);
 
 
-    cv::Mat flow(renderWindow.x2 - renderWindow.x1,renderWindow.y2 - renderWindow.y1,CV_32FC2);
+    cv::Mat flow(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1, CV_32FC2);
 
     if (method == eOpticalFlowFarneback) {
-        IplImage* srcRefCVImg = createLuminance8bitImage(ref, renderWindow);
-        IplImage* srcNextCVImg = createLuminance8bitImage(other, renderWindow);
-        cv::Mat srcRefMatImg(srcRefCVImg, false /*copyData*/);
-        cv::Mat srcNextMatImg(srcNextCVImg, false /*copyData*/);
+        // works in grayscale
+        CVImageWrapper srcRef,srcNext;
+        fetchCVImageGrayscale(ref, renderWindow, true, &srcRef);
+        fetchCVImageGrayscale(other, renderWindow, true, &srcNext);
+        cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
+        cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
 
-
-        assert( srcRefMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcRefMatImg.cols == (renderWindow.x2 - renderWindow.x1) );
-        assert( srcNextMatImg.rows == (renderWindow.y2 - renderWindow.y1) && srcNextMatImg.cols == (renderWindow.x2 - renderWindow.x1) );
-
+#pragma message WARN("TODO: use the OFX parameters!")
         int nbLevels = 3;
         double pyrScale = 0.5;
         int nbIterations = 15;
@@ -318,29 +317,30 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
         int winSize = 3;
 
         calcOpticalFlowFarneback(srcRefMatImg, srcNextMatImg, flow, pyrScale, nbLevels, winSize, nbIterations, polyN, polySigma, 0);
-
-        cvReleaseImage(&srcRefCVImg);
-        cvReleaseImage(&srcNextCVImg);
     } else if (method == eOpticalFlowSimpleFlow) {
+        // works in color
         CVImageWrapper srcRef,srcNext;
         fetchCVImage(ref, renderWindow, true, &srcRef);
         fetchCVImage(other, renderWindow, true, &srcNext);
-
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
+
+#pragma message WARN("TODO: use the OFX parameters!")
         int nbLayers = 3;
         int avgBlockSize = 2;
         int maxFlow = 4;
 
         calcOpticalFlowSF(srcRefMatImg, srcNextMatImg, flow, nbLayers, avgBlockSize, maxFlow);
     } else if (method == eOpticalFlowDualTVL1) {
-        IplImage* srcRefCVImg = createLuminance8bitImage(ref, renderWindow);
-        IplImage* srcNextCVImg = createLuminance8bitImage(other, renderWindow);
-        cv::Mat srcRefMatImg(srcRefCVImg, false /*copyData*/);
-        cv::Mat srcNextMatImg(srcNextCVImg, false /*copyData*/);
-
+        // works in grayscale
+        CVImageWrapper srcRef,srcNext;
+        fetchCVImageGrayscale(ref, renderWindow, true, &srcRef);
+        fetchCVImageGrayscale(other, renderWindow, true, &srcNext);
+        cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
+        cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
 
         Ptr<DenseOpticalFlow> tvl1 = createOptFlow_DualTVL1();
+#pragma message WARN("TODO: use the OFX parameters!")
         tvl1->set("tau", 0.25);
         tvl1->set("lambda", 0.15);
         tvl1->set("theta", 0.3);
@@ -349,10 +349,6 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
         tvl1->set("epsilon", 0.01);
         tvl1->set("iterations", 300);
         tvl1->calc(srcRefMatImg,srcNextMatImg,flow);
-
-
-        cvReleaseImage(&srcRefCVImg);
-        cvReleaseImage(&srcNextCVImg);
     }
 
     IplImage flowImg = (IplImage)flow;
