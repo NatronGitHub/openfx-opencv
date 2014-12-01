@@ -1,8 +1,18 @@
+os:
+  - linux
+#  - osx
+
 language: cpp
 
 compiler:
   - gcc
   - clang
+
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
+  fast_finish: true
 
 # Travis CI has 1.5 cores per VM, take advantage of it
 # But first, the makefiles have to be fixed: all plugins are using the same .o's
@@ -15,6 +25,11 @@ before_install:
   - git submodule update --init --recursive
   - sudo add-apt-repository -y ppa:kubuntu-ppa/backports 
   - sudo apt-get update
+
 install:
   - sudo apt-get install libcv-dev libcvaux-dev libhighgui-dev libopencv-dev
-script: make -C opencv2fx CONFIG=debug
+
+script:
+  - make CONFIG=debug
+  - make nomulti CONFIG=debug
+  - make -C opencv2fx CONFIG=debug
