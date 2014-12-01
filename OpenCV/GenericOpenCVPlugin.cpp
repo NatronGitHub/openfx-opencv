@@ -67,7 +67,7 @@ CVImageWrapper::initialize(OFX::ImageEffect* instance,
         break;
     default:
         throwSuiteStatusException(kOfxStatErrImageFormat);
-        break;
+        return;
     }
     CvSize imageSize = cvSize(bounds.x2 - bounds.x1,
                               bounds.y2 - bounds.y1);
