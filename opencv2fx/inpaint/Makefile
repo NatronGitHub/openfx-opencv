@@ -4,4 +4,5 @@ PATHTOROOT = ../../openfx/Examples
 VPATH = ..
 
 include $(PATHTOROOT)/Makefile.master
-CXXFLAGS += -I..
+CXXFLAGS += `pkg-config opencv --cflags` -I..
+LINKFLAGS += `pkg-config opencv --libs`
