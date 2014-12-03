@@ -208,12 +208,25 @@ class VectorGeneratorPlugin
 public:
     /** @brief ctor */
     VectorGeneratorPlugin(OfxImageEffectHandle handle)
-        : GenericOpenCVPlugin(handle)
-          , _rChannel(0)
-          , _gChannel(0)
-          , _bChannel(0)
-          , _aChannel(0)
-          , _method(0)
+    : GenericOpenCVPlugin(handle)
+    , _rChannel(0)
+    , _gChannel(0)
+    , _bChannel(0)
+    , _aChannel(0)
+    , _method(0)
+    , _levels(0)
+    , _iteratrions(0)
+    , _neighborhood(0)
+    , _sigma(0)
+    , _layers(0)
+    , _blockSize(0)
+    , _maxFlow(0)
+    , _tau(0)
+    , _lambda(0)
+    , _theta(0)
+    , _nScales(0)
+    , _warps(0)
+    , _epsilon(0)
     {
         _rChannel = fetchChoiceParam(kParamRChannel);
         _gChannel = fetchChoiceParam(kParamGChannel);
@@ -221,12 +234,29 @@ public:
         _aChannel = fetchChoiceParam(kParamAChannel);
         _method = fetchChoiceParam(kParamMethod);
         assert(_rChannel && _gChannel && _bChannel && _aChannel);
+        
+        _levels = fetchIntParam(kParamLevels);
+        _iteratrions = fetchIntParam(kParamIterations);
+        _neighborhood = fetchIntParam(kParamPixelNeighborhood);
+        _sigma = fetchDoubleParam(kParamSigma);
+        _layers = fetchIntParam(kParamLayers);
+        _blockSize = fetchIntParam(kParamBlockSize);
+        _maxFlow = fetchIntParam(kParamMaxFlow);
+        _tau = fetchDoubleParam(kParamTau);
+        _lambda = fetchDoubleParam(kParamLambda);
+        _theta = fetchDoubleParam(kParamTheta);
+        _nScales = fetchIntParam(kParamNScales);
+        _warps = fetchIntParam(kParamWarps);
+        _epsilon = fetchDoubleParam(kParamEpsilon);
+        
+        assert(_levels && _iteratrions && _neighborhood && _sigma && _layers && _blockSize && _maxFlow && _tau && _lambda && _theta && _nScales && _warps && _epsilon);
     }
 
 private:
     /* Override the render */
     virtual void render(const OFX::RenderArguments &args) OVERRIDE FINAL;
 
+    virtual void changedParam(const InstanceChangedArgs &args, const std::string &paramName) OVERRIDE FINAL;
     /**
      * @brief Compute motion vectors from 'ref' to 'other' on the given renderWindow and set them in the given channel indexes
      * of the dst Image.
@@ -243,6 +273,30 @@ private:
     ChoiceParam* _bChannel;
     ChoiceParam* _aChannel;
     ChoiceParam* _method;
+    
+    //Farneback
+    IntParam* _levels;
+    
+    //Farneback + DUAL TV L1
+    IntParam* _iteratrions;
+    
+    //Farneback
+    IntParam* _neighborhood;
+    DoubleParam* _sigma;
+    
+    //Simple flow
+    IntParam* _layers;
+    IntParam* _blockSize;
+    IntParam* _maxFlow;
+    
+    //Dual TV L1
+    DoubleParam* _tau;
+    DoubleParam* _lambda;
+    DoubleParam* _theta;
+    IntParam* _nScales;
+    IntParam* _warps;
+    DoubleParam* _epsilon;
+    
 };
 
 static IplImage*
@@ -308,13 +362,16 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
 
-#pragma message WARN("TODO: use the OFX parameters!")
-        int nbLevels = 3;
+        int nbLevels;// = 3;
         double pyrScale = 0.5;
-        int nbIterations = 15;
-        int polyN = 5;
-        int polySigma = 1.1;
+        int nbIterations;// = 15;
+        int polyN;// = 5;
+        double polySigma;// = 1.1;
         int winSize = 3;
+        _levels->getValue(nbLevels);
+        _iteratrions->getValue(nbIterations);
+        _neighborhood->getValue(polyN);
+        _sigma->getValue(polySigma);
 
         calcOpticalFlowFarneback(srcRefMatImg, srcNextMatImg, flow, pyrScale, nbLevels, winSize, nbIterations, polyN, polySigma, 0);
     } else if (method == eOpticalFlowSimpleFlow) {
@@ -325,10 +382,12 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
 
-#pragma message WARN("TODO: use the OFX parameters!")
-        int nbLayers = 3;
-        int avgBlockSize = 2;
-        int maxFlow = 4;
+        int nbLayers;// = 3;
+        int avgBlockSize;// = 2;
+        int maxFlow;// = 4;
+        _layers->getValue(nbLayers);
+        _blockSize->getValue(avgBlockSize);
+        _maxFlow->getValue(maxFlow);
 
         calcOpticalFlowSF(srcRefMatImg, srcNextMatImg, flow, nbLayers, avgBlockSize, maxFlow);
     } else if (method == eOpticalFlowDualTVL1) {
@@ -340,14 +399,25 @@ VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
         cv::Mat srcNextMatImg(srcNext.getIplImage(), false /*copyData*/);
 
         Ptr<DenseOpticalFlow> tvl1 = createOptFlow_DualTVL1();
-#pragma message WARN("TODO: use the OFX parameters!")
-        tvl1->set("tau", 0.25);
-        tvl1->set("lambda", 0.15);
-        tvl1->set("theta", 0.3);
-        tvl1->set("nscales", 5);
-        tvl1->set("warps", 5);
-        tvl1->set("epsilon", 0.01);
-        tvl1->set("iterations", 300);
+        double tau,lambda,theta,epsilon;
+        int nScales,warps,iterations;
+        
+        _tau->getValue(tau);
+        _lambda->getValue(lambda);
+        _theta->getValue(theta);
+        _epsilon->getValue(epsilon);
+        
+        _nScales->getValue(nScales);
+        _warps->getValue(warps);
+        _iteratrions->getValue(iterations);
+        
+        tvl1->set("tau",tau /*0.25*/);
+        tvl1->set("lambda",lambda /*0.15*/);
+        tvl1->set("theta",theta /*0.3*/);
+        tvl1->set("nscales",nScales /*5*/);
+        tvl1->set("warps", warps/*5*/);
+        tvl1->set("epsilon", epsilon/*0.01*/);
+        tvl1->set("iterations", iterations/*300*/);
         tvl1->calc(srcRefMatImg,srcNextMatImg,flow);
     }
 
@@ -492,6 +562,32 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
     }
 } // render
 
+void
+VectorGeneratorPlugin::changedParam(const InstanceChangedArgs &args, const std::string &paramName)
+{
+    if (paramName == kParamMethod) {
+        int method_i;
+        _method->getValue(method_i);
+        OpticalFlowMethodEnum method = (OpticalFlowMethodEnum)method_i;
+        _levels->setIsSecret(method != eOpticalFlowFarneback);
+        _iteratrions->setIsSecret(method != eOpticalFlowFarneback && method != eOpticalFlowDualTVL1);
+        _neighborhood->setIsSecret(method != eOpticalFlowFarneback);
+        _sigma->setIsSecret(method != eOpticalFlowFarneback);
+        
+        _layers->setIsSecret(method != eOpticalFlowSimpleFlow);
+        _blockSize->setIsSecret(method != eOpticalFlowSimpleFlow);
+        _maxFlow->setIsSecret(method != eOpticalFlowSimpleFlow);
+        
+        _tau->setIsSecret(method != eOpticalFlowDualTVL1);
+        _lambda->setIsSecret(method != eOpticalFlowDualTVL1);
+        _theta->setIsSecret(method != eOpticalFlowDualTVL1);
+        _nScales->setIsSecret(method != eOpticalFlowDualTVL1);
+        _warps->setIsSecret(method != eOpticalFlowDualTVL1);
+        _epsilon->setIsSecret(method != eOpticalFlowDualTVL1);
+        
+    }
+}
+
 mDeclarePluginFactory(VectorGeneratorPluginFactory, {}, {}
                       );
 
@@ -579,6 +675,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         page->addChild(*param);
     }
 
+    OpticalFlowMethodEnum defaultMethod = eOpticalFlowFarneback;
     {
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamMethod);
         param->setLabels(kParamMethodLabel, kParamMethodLabel, kParamMethodLabel);
@@ -589,7 +686,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->appendOption("Simple flow");
         assert(param->getNOptions() == eOpticalFlowDualTVL1);
         param->appendOption("Dual TV L1");
-        param->setDefault(0);
+        param->setDefault((int)defaultMethod);
         param->setAnimates(false);
         page->addChild(*param);
     }
@@ -601,6 +698,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLevelsHint);
         param->setDefault(3);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -611,6 +709,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamIterationsHint);
         param->setDefault(15);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowFarneback && defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -621,6 +720,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamPixelNeighborhoodHint);
         param->setDefault(5);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -631,6 +731,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamSigmaHint);
         param->setDefault(1.1);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -641,18 +742,10 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLayersHint);
         param->setDefault(3);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowSimpleFlow);
         page->addChild(*param);
     }
 
-    //Simple flow
-    {
-        IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
-        param->setLabels(kParamLayersLabel, kParamLayersLabel, kParamLayersLabel);
-        param->setHint(kParamLayersHint);
-        param->setDefault(3);
-        param->setAnimates(true);
-        page->addChild(*param);
-    }
 
     //Simple flow
     {
@@ -671,6 +764,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamMaxFlowHint);
         param->setDefault(4);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowSimpleFlow);
         page->addChild(*param);
     }
 
@@ -681,6 +775,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamTauHint);
         param->setDefault(0.25);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -691,6 +786,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLambdaHint);
         param->setDefault(0.15);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -701,6 +797,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamThetaHint);
         param->setDefault(0.3);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -711,6 +808,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamNScalesHint);
         param->setDefault(5);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -721,6 +819,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamWarpsHint);
         param->setDefault(5);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
     //Dual TV L1
@@ -730,6 +829,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamEpsilonHint);
         param->setDefault(0.01);
         param->setAnimates(true);
+        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 } // describeInContext
