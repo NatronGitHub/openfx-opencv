@@ -263,8 +263,12 @@ private:
      * @param channelIndex[in] A vector for each coordinate (x,y) of components of the output image to fill.
      * Each componentn will be a value between [0 , 3] targeting one of the R/G/B/A channels of the dst image.
      **/
-    void calcOpticalFlow(OFX::Image* ref,OFX::Image* other,const OfxRectI & renderWindow,std::vector<int> channelIndex[2],
-                         OpticalFlowMethodEnum method,OFX::Image* dst);
+    void calcOpticalFlow(const OFX::Image* ref,
+                         const OFX::Image* other,
+                         const OfxRectI & renderWindow,
+                         std::vector<int> channelIndex[2],
+                         OpticalFlowMethodEnum method,
+                         OFX::Image* dst);
 
 private:
 
@@ -342,8 +346,8 @@ createLuminance8bitImage(OFX::Image* img,
 }
 
 void
-VectorGeneratorPlugin::calcOpticalFlow(OFX::Image* ref,
-                                       OFX::Image* other,
+VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
+                                       const OFX::Image* other,
                                        const OfxRectI & renderWindow,
                                        std::vector<int> channelIndex[2],
                                        OpticalFlowMethodEnum method,
@@ -463,7 +467,8 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
     }
 
     //Original source image at current time
-    std::auto_ptr<OFX::Image> srcRef( srcClip_->fetchImage(args.time) );
+    std::auto_ptr<const OFX::Image> srcRef((srcClip_ && srcClip_->isConnected()) ?
+                                           srcClip_->fetchImage(args.time) : 0);
 
     if ( !srcRef.get() ) {
         OFX::throwSuiteStatusException(kOfxStatFailed);
@@ -484,7 +489,8 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
 
     if (backwardNeeded) {
         //Other image for "backward" optical flow computation
-        std::auto_ptr<OFX::Image> srcPrev( srcClip_->fetchImage(args.time - 1) );
+        std::auto_ptr<const OFX::Image> srcPrev((srcClip_ && srcClip_->isConnected()) ?
+                                                srcClip_->fetchImage(args.time-1) : 0);
         if ( !srcPrev.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
@@ -523,7 +529,8 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
 
     if (forwardNeeded) {
         //Other image for "backward" optical flow computation
-        std::auto_ptr<OFX::Image> srcNext( srcClip_->fetchImage(args.time + 1) );
+        std::auto_ptr<const OFX::Image> srcNext((srcClip_ && srcClip_->isConnected()) ?
+                                                srcClip_->fetchImage(args.time+1) : 0);
         if ( !srcNext.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
