@@ -78,7 +78,7 @@
 
 #define kPluginName "VectorGeneratorOFX"
 #define kPluginGrouping "Time"
-#define kPluginDescription ""
+#define kPluginDescription "Compute optical flow for the input sequence, using OpenCV."
 #define kPluginIdentifier "net.sf.openfx.VectorGenerator"
 #define kPluginVersionMajor 1 // Incrementing this number means that you have broken backwards compatibility of the plug-in.
 #define kPluginVersionMinor 0 // Increment this when you have fixed a bug or made it faster.
@@ -250,6 +250,11 @@ public:
         _epsilon = fetchDoubleParam(kParamEpsilon);
         
         assert(_levels && _iteratrions && _neighborhood && _sigma && _layers && _blockSize && _maxFlow && _tau && _lambda && _theta && _nScales && _warps && _epsilon);
+
+        int method_i;
+        _method->getValue(method_i);
+        OpticalFlowMethodEnum method = (OpticalFlowMethodEnum)method_i;
+        updateVisibility(method);
     }
 
 private:
@@ -265,10 +270,13 @@ private:
      **/
     void calcOpticalFlow(const OFX::Image* ref,
                          const OFX::Image* other,
+                         const OfxPointD & renderScale,
                          const OfxRectI & renderWindow,
                          std::vector<int> channelIndex[2],
                          OpticalFlowMethodEnum method,
                          OFX::Image* dst);
+
+    void updateVisibility(OpticalFlowMethodEnum method);
 
 private:
 
@@ -310,7 +318,6 @@ createLuminance8bitImage(OFX::Image* img,
     IplImage* cvImg = cvCreateImage(cvSize(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1), IPL_DEPTH_8U, 1);
     int srcRowElements = img->getRowBytes() / sizeof(float);
     int dstRowElements = cvImg->widthStep;
-    const float* src_pixels = (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1);
     char* dst_pixels = cvImg->imageData;
     int nComps;
 
@@ -329,15 +336,19 @@ createLuminance8bitImage(OFX::Image* img,
         break;
     }
 
+    assert(img->getPixelDepth() == eBitDepthFloat);
+
+    const float* src_pixels = (const float*)img->getPixelAddress(renderWindow.x1, renderWindow.y1);
+    const OFX::Color::LutBase* srgblut = OFX::Color::LutManager::sRGBLut<OFX::MultiThread::Mutex>();
     for (int y = 0; y < cvImg->height; ++y, src_pixels += (srcRowElements) - cvImg->width * nComps, dst_pixels += (dstRowElements) - cvImg->width) {
         for (int x = 0; x < cvImg->width; ++x,src_pixels += nComps, ++dst_pixels) {
             if (nComps == 1) {
-                *dst_pixels = OFX::Color::floatToInt<256>(*src_pixels);
+                *dst_pixels = srgblut->toColorSpaceUint8FromLinearFloatFast(*src_pixels);
             } else {
                 double r = src_pixels[0];
                 double g = src_pixels[1];
                 double b = src_pixels[2];
-                *dst_pixels = OFX::Color::floatToInt<256>(0.299 * r + 0.587 * g + 0.114 * b);
+                *dst_pixels = srgblut->toColorSpaceUint8FromLinearFloatFast(0.2126f * r + 0.7152f * g + 0.0722f * b);
             }
         }
     }
@@ -348,13 +359,14 @@ createLuminance8bitImage(OFX::Image* img,
 void
 VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
                                        const OFX::Image* other,
+                                       const OfxPointD& renderScale,
                                        const OfxRectI & renderWindow,
                                        std::vector<int> channelIndex[2],
                                        OpticalFlowMethodEnum method,
                                        OFX::Image* dst)
 {
     assert(dst->getPixelComponents() == OFX::ePixelComponentRGBA);
-
+    const int nComponents = 4;
 
     cv::Mat flow(renderWindow.x2 - renderWindow.x1, renderWindow.y2 - renderWindow.y1, CV_32FC2);
 
@@ -439,9 +451,10 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
     for (int y = 0; y < flowImg.height; ++y) {
         for (int x = 0; x < flowImg.width; ++x) {
             for (int coord = 0; coord < 2; ++coord) {
+                float v = src_pixels[x * 2 + coord] / (coord == 0 ? renderScale.x : renderScale.y);
                 for (int k = 0; k < channelIndex[coord].size(); ++k) {
                     assert(channelIndex[coord][k] >= 0 && channelIndex[coord][k] <= 3);
-                    dst_pixels[x * 4 + channelIndex[coord][k]] = src_pixels[x * 2 + coord];
+                    dst_pixels[x * nComponents + channelIndex[coord][k]] = v;
                 }
             }
         }
@@ -524,7 +537,7 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
             channelIndex[1].push_back(3);
         }
 
-        calcOpticalFlow( srcRef.get(), srcPrev.get(),  args.renderWindow, channelIndex, method, dst.get() );
+        calcOpticalFlow( srcRef.get(), srcPrev.get(), args.renderScale, args.renderWindow, channelIndex, method, dst.get() );
     }
 
     if (forwardNeeded) {
@@ -565,9 +578,29 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
             channelIndex[1].push_back(3);
         }
 
-        calcOpticalFlow( srcRef.get(), srcNext.get(), args.renderWindow, channelIndex, method, dst.get() );
+        calcOpticalFlow( srcRef.get(), srcNext.get(), args.renderScale, args.renderWindow, channelIndex, method, dst.get() );
     }
 } // render
+
+void
+VectorGeneratorPlugin::updateVisibility(OpticalFlowMethodEnum method)
+{
+    _levels->setIsSecret(method != eOpticalFlowFarneback);
+    _iteratrions->setIsSecret(method != eOpticalFlowFarneback && method != eOpticalFlowDualTVL1);
+    _neighborhood->setIsSecret(method != eOpticalFlowFarneback);
+    _sigma->setIsSecret(method != eOpticalFlowFarneback);
+
+    _layers->setIsSecret(method != eOpticalFlowSimpleFlow);
+    _blockSize->setIsSecret(method != eOpticalFlowSimpleFlow);
+    _maxFlow->setIsSecret(method != eOpticalFlowSimpleFlow);
+
+    _tau->setIsSecret(method != eOpticalFlowDualTVL1);
+    _lambda->setIsSecret(method != eOpticalFlowDualTVL1);
+    _theta->setIsSecret(method != eOpticalFlowDualTVL1);
+    _nScales->setIsSecret(method != eOpticalFlowDualTVL1);
+    _warps->setIsSecret(method != eOpticalFlowDualTVL1);
+    _epsilon->setIsSecret(method != eOpticalFlowDualTVL1);
+}
 
 void
 VectorGeneratorPlugin::changedParam(const InstanceChangedArgs &args, const std::string &paramName)
@@ -576,22 +609,7 @@ VectorGeneratorPlugin::changedParam(const InstanceChangedArgs &args, const std::
         int method_i;
         _method->getValue(method_i);
         OpticalFlowMethodEnum method = (OpticalFlowMethodEnum)method_i;
-        _levels->setIsSecret(method != eOpticalFlowFarneback);
-        _iteratrions->setIsSecret(method != eOpticalFlowFarneback && method != eOpticalFlowDualTVL1);
-        _neighborhood->setIsSecret(method != eOpticalFlowFarneback);
-        _sigma->setIsSecret(method != eOpticalFlowFarneback);
-        
-        _layers->setIsSecret(method != eOpticalFlowSimpleFlow);
-        _blockSize->setIsSecret(method != eOpticalFlowSimpleFlow);
-        _maxFlow->setIsSecret(method != eOpticalFlowSimpleFlow);
-        
-        _tau->setIsSecret(method != eOpticalFlowDualTVL1);
-        _lambda->setIsSecret(method != eOpticalFlowDualTVL1);
-        _theta->setIsSecret(method != eOpticalFlowDualTVL1);
-        _nScales->setIsSecret(method != eOpticalFlowDualTVL1);
-        _warps->setIsSecret(method != eOpticalFlowDualTVL1);
-        _epsilon->setIsSecret(method != eOpticalFlowDualTVL1);
-        
+        updateVisibility(method);
     }
 }
 
@@ -613,8 +631,9 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
     // create the mandated source clip
     ClipDescriptor *srcClip = desc.defineClip(kOfxImageEffectSimpleSourceClipName);
 
-    //srcClip->addSupportedComponent(ePixelComponentRGBA);
+    srcClip->addSupportedComponent(ePixelComponentRGBA);
     srcClip->addSupportedComponent(ePixelComponentRGB);
+    srcClip->addSupportedComponent(ePixelComponentAlpha);
     srcClip->setTemporalClipAccess(false);
     srcClip->setSupportsTiles(kSupportsTiles);
     srcClip->setIsMask(false);
@@ -705,7 +724,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLevelsHint);
         param->setDefault(3);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -716,7 +734,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamIterationsHint);
         param->setDefault(15);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowFarneback && defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -727,7 +744,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamPixelNeighborhoodHint);
         param->setDefault(5);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -738,7 +754,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamSigmaHint);
         param->setDefault(1.1);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowFarneback);
         page->addChild(*param);
     }
 
@@ -749,7 +764,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLayersHint);
         param->setDefault(3);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowSimpleFlow);
         page->addChild(*param);
     }
 
@@ -771,7 +785,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamMaxFlowHint);
         param->setDefault(4);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowSimpleFlow);
         page->addChild(*param);
     }
 
@@ -782,7 +795,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamTauHint);
         param->setDefault(0.25);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -793,7 +805,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamLambdaHint);
         param->setDefault(0.15);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -804,7 +815,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamThetaHint);
         param->setDefault(0.3);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -815,7 +825,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamNScalesHint);
         param->setDefault(5);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 
@@ -826,7 +835,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamWarpsHint);
         param->setDefault(5);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
     //Dual TV L1
@@ -836,7 +844,6 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamEpsilonHint);
         param->setDefault(0.01);
         param->setAnimates(true);
-        param->setIsSecret(defaultMethod != eOpticalFlowDualTVL1);
         page->addChild(*param);
     }
 } // describeInContext
