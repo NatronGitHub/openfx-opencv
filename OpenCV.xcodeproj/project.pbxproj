@@ -527,6 +527,7 @@
 					"$(OFX_PATH)/Support/Plugins/include",
 					"$(OFX_PATH)/Support/include",
 					SupportExt,
+					CVSupport,
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);
@@ -562,6 +563,7 @@
 					"$(OFX_PATH)/Support/Plugins/include",
 					"$(OFX_PATH)/Support/include",
 					SupportExt,
+					CVSupport,
 					"$(OPENCV_PATH)/include",
 					"$(OPENCV_PATH)/include/opencv",
 				);
@@ -589,13 +591,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXPORTED_SYMBOLS_FILE = "$(OFX_PATH)/Support/include/osxSymbols";
-				HEADER_SEARCH_PATHS = (
-					"$(OFX_PATH)/include",
-					"$(OPENCV_PATH)/include",
-					"$(OPENCV_PATH)/include/opencv",
-					CVSupport,
-					SupportExt,
-				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/OFX/Plugins/$(PROJECT_NAME)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -610,13 +605,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXPORTED_SYMBOLS_FILE = "$(OFX_PATH)/Support/include/osxSymbols";
-				HEADER_SEARCH_PATHS = (
-					"$(OFX_PATH)/include",
-					"$(OPENCV_PATH)/include",
-					"$(OPENCV_PATH)/include/opencv",
-					CVSupport,
-					SupportExt,
-				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/OFX/Plugins/$(PROJECT_NAME)";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -645,12 +633,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXPORTED_SYMBOLS_FILE = "$(OFX_PATH)/Support/include/osxSymbols";
-				HEADER_SEARCH_PATHS = (
-					"$(OFX_PATH)/include",
-					"$(OPENCV_PATH)/include",
-					"$(OPENCV_PATH)/include/opencv",
-					CVSupport,
-					SupportExt,
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"OFX_EXTENSIONS_NUKE=1",
+					"OFX_EXTENSIONS_NATRON=1",
 				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/OFX/Plugins/$(PROJECT_NAME)";
 				LIBRARY_SEARCH_PATHS = (
@@ -666,12 +652,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXPORTED_SYMBOLS_FILE = "$(OFX_PATH)/Support/include/osxSymbols";
-				HEADER_SEARCH_PATHS = (
-					"$(OFX_PATH)/include",
-					"$(OPENCV_PATH)/include",
-					"$(OPENCV_PATH)/include/opencv",
-					CVSupport,
-					SupportExt,
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"OFX_EXTENSIONS_NUKE=1",
+					"OFX_EXTENSIONS_NATRON=1",
 				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/OFX/Plugins/$(PROJECT_NAME)";
 				LIBRARY_SEARCH_PATHS = (
