@@ -108,15 +108,15 @@
 #define kChannelNone "0"
 #define kChannelNoneHint "0 constant channel"
 
-#define kChannelBackwardU "backward.u"
-#define kChannelBackwardUHint "x flow (in pixels) to the previous frame."
-#define kChannelBackwardV "backward.v"
-#define kChannelBackwardVHint "x flow (in pixels) to the previous frame."
-
 #define kChannelForwardU "forward.u"
 #define kChannelForwardUHint "x flow (in pixels) to the next frame."
 #define kChannelForwardV "forward.v"
 #define kChannelForwardVHint "y flow (in pixels) to the next frame."
+
+#define kChannelBackwardU "backward.u"
+#define kChannelBackwardUHint "x flow (in pixels) to the previous frame."
+#define kChannelBackwardV "backward.v"
+#define kChannelBackwardVHint "x flow (in pixels) to the previous frame."
 
 #define kParamMethod "method"
 #define kParamMethodLabel "Method"
@@ -464,19 +464,20 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
     _bChannel->getValue(bChannel);
     _aChannel->getValue(aChannel);
 
-    bool backwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
-    bool forwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
+    bool forwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
+    bool backwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
     int method_i;
     _method->getValue(method_i);
     OpticalFlowMethodEnum method = (OpticalFlowMethodEnum)method_i;
 
-    if (backwardNeeded) {
+    if (forwardNeeded) {
         //Other image for "backward" optical flow computation
         std::auto_ptr<const OFX::Image> srcOther((_srcClip && _srcClip->isConnected()) ?
-                                                _srcClip->fetchImage(args.time-1) : 0);
+                                                _srcClip->fetchImage(args.time+1) : 0);
         if ( !srcOther.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
+
 
         std::vector<int> channelIndex[2];
         channelIndex[0] = std::vector<int>();
@@ -510,14 +511,13 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
         calcOpticalFlow( srcRef.get(), srcOther.get(), args.renderScale, args.renderWindow, channelIndex, method, dst.get() );
     }
 
-    if (forwardNeeded) {
+    if (backwardNeeded) {
         //Other image for "backward" optical flow computation
         std::auto_ptr<const OFX::Image> srcOther((_srcClip && _srcClip->isConnected()) ?
-                                                _srcClip->fetchImage(args.time+1) : 0);
+                                                 _srcClip->fetchImage(args.time-1) : 0);
         if ( !srcOther.get() ) {
             OFX::throwSuiteStatusException(kOfxStatFailed);
         }
-
 
         std::vector<int> channelIndex[2];
         channelIndex[0] = std::vector<int>();
@@ -550,7 +550,7 @@ VectorGeneratorPlugin::render(const OFX::RenderArguments &args)
 
         calcOpticalFlow( srcRef.get(), srcOther.get(), args.renderScale, args.renderWindow, channelIndex, method, dst.get() );
     }
-    //copyPixels(*this, args.renderWindow, srcRef.get(), dst.get());
+    
 } // render
 
 void
@@ -595,8 +595,8 @@ VectorGeneratorPlugin::getFramesNeeded(const OFX::FramesNeededArguments &args,
     _bChannel->getValue(bChannel);
     _aChannel->getValue(aChannel);
 
-    bool backwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
-    bool forwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
+    bool forwardNeeded = rChannel == 1 || rChannel == 2 || gChannel == 1 || gChannel == 2 || bChannel == 1 || bChannel == 2 || aChannel == 1 || aChannel == 2;
+    bool backwardNeeded = rChannel == 3 || rChannel == 4 || gChannel == 3 || gChannel == 4 || bChannel == 3 || bChannel == 4 || aChannel == 3 || aChannel == 4;
 
     if (backwardNeeded || forwardNeeded) {
         OfxRangeD range;
@@ -645,10 +645,10 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setLabels(kParamRChannelLabel, kParamRChannelLabel, kParamRChannelLabel);
         param->setHint(kParamRChannelHint);
         param->appendOption(kChannelNone, kChannelNoneHint);
-        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
-        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->appendOption(kChannelForwardU, kChannelForwardUHint);
         param->appendOption(kChannelForwardV, kChannelForwardVHint);
+        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
+        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->setDefault(1);
         param->setAnimates(true);
         page->addChild(*param);
@@ -659,10 +659,10 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setLabels(kParamGChannelLabel, kParamGChannelLabel, kParamGChannelLabel);
         param->setHint(kParamGChannelHint);
         param->appendOption(kChannelNone, kChannelNoneHint);
-        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
-        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->appendOption(kChannelForwardU, kChannelForwardUHint);
         param->appendOption(kChannelForwardV, kChannelForwardVHint);
+        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
+        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->setDefault(2);
         param->setAnimates(true);
         page->addChild(*param);
@@ -671,11 +671,11 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamBChannel);
         param->setLabels(kParamBChannelLabel, kParamBChannelLabel, kParamBChannelLabel);
         param->setHint(kParamBChannelHint);
-        param->appendOption(kChannelNone);
-        param->appendOption(kChannelBackwardU);
-        param->appendOption(kChannelBackwardV);
-        param->appendOption(kChannelForwardU);
-        param->appendOption(kChannelForwardV);
+        param->appendOption(kChannelNone, kChannelNoneHint);
+        param->appendOption(kChannelForwardU, kChannelForwardUHint);
+        param->appendOption(kChannelForwardV, kChannelForwardVHint);
+        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
+        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->setDefault(3);
         param->setAnimates(true);
         page->addChild(*param);
@@ -684,11 +684,11 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamAChannel);
         param->setLabels(kParamAChannelLabel, kParamAChannelLabel, kParamAChannelLabel);
         param->setHint(kParamAChannelHint);
-        param->appendOption(kChannelNone);
-        param->appendOption(kChannelBackwardU);
-        param->appendOption(kChannelBackwardV);
-        param->appendOption(kChannelForwardU);
-        param->appendOption(kChannelForwardV);
+        param->appendOption(kChannelNone, kChannelNoneHint);
+        param->appendOption(kChannelForwardU, kChannelForwardUHint);
+        param->appendOption(kChannelForwardV, kChannelForwardVHint);
+        param->appendOption(kChannelBackwardU, kChannelBackwardUHint);
+        param->appendOption(kChannelBackwardV, kChannelBackwardVHint);
         param->setDefault(4);
         param->setAnimates(true);
         page->addChild(*param);
