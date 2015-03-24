@@ -95,19 +95,20 @@ CVImageWrapper::getData() const
 
 GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
-      , dstClip_(0)
-      , srcClip_(0)
+      , _dstClip(0)
+      , _srcClip(0)
       , _srgbLut( OFX::Color::LutManager::sRGBLut<OFX::MultiThread::Mutex>() )
 {
-    dstClip_ = fetchClip(kOfxImageEffectOutputClipName);
-    srcClip_ = fetchClip(kOfxImageEffectSimpleSourceClipName);
+    _dstClip = fetchClip(kOfxImageEffectOutputClipName);
+    _srcClip = fetchClip(kOfxImageEffectSimpleSourceClipName);
 }
 
 void
-GenericOpenCVPlugin::fetchCVImage(const OFX::Image* img,
-                                  const OfxRectI & renderWindow,
-                                  bool copyData,
-                                  CVImageWrapper* cvImg)
+GenericOpenCVPlugin::fetchCVImage8U(const OFX::Image* img,
+                                    const OfxRectI & renderWindow,
+                                    bool copyData,
+                                    CVImageWrapper* dstImg,
+                                    OFX::PixelComponentEnum dstPixelComponents)
 {
     const void* pixelData = NULL;
     OfxRectI bounds;
@@ -118,12 +119,14 @@ GenericOpenCVPlugin::fetchCVImage(const OFX::Image* img,
     getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
 
     const OfxRectI &dstBounds = renderWindow;
-    const OFX::PixelComponentEnum dstPixelComponents = pixelComponents;
+    if (dstPixelComponents == ePixelComponentNone) {
+        dstPixelComponents = pixelComponents;
+    }
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    cvImg->initialize(this, dstBounds, dstPixelComponents, dstBitDepth);
-    unsigned char* dstPixelData = cvImg->getData();
-    int dstRowBytes = cvImg->getIplImage()->widthStep;
+    dstImg->initialize(this, dstBounds, dstPixelComponents, dstBitDepth);
+    unsigned char* dstPixelData = dstImg->getData();
+    int dstRowBytes = dstImg->getIplImage()->widthStep;
 
     if (copyData) {
         OfxRectI convertWindow;
@@ -137,10 +140,10 @@ GenericOpenCVPlugin::fetchCVImage(const OFX::Image* img,
 }
 
 void
-GenericOpenCVPlugin::fetchCVImageGrayscale(const OFX::Image* img,
-                                           const OfxRectI & renderWindow,
-                                           bool copyData,
-                                           CVImageWrapper* cvImg)
+GenericOpenCVPlugin::fetchCVImage8UGrayscale(const OFX::Image* img,
+                                             const OfxRectI & renderWindow,
+                                             bool copyData,
+                                             CVImageWrapper* cvImg)
 {
     const void* pixelData = NULL;
     OfxRectI bounds;

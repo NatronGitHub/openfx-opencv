@@ -92,15 +92,15 @@ private:
 
 protected:
 
-    void fetchCVImage(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* cvImg);
+    void fetchCVImage8U(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* dstImg, OFX::PixelComponentEnum dstPixelComponents = OFX::ePixelComponentNone);
 
-    void fetchCVImageGrayscale(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* cvImg);
+    void fetchCVImage8UGrayscale(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* dstImg);
 
     void cvImageToOfxImage(const CVImageWrapper & cvImg, const OfxRectI & renderWindow, OFX::Image* img);
 
     // do not need to delete these, the ImageEffect is managing them for us
-    OFX::Clip *dstClip_;
-    OFX::Clip *srcClip_;
+    OFX::Clip *_dstClip;
+    OFX::Clip *_srcClip;
     const OFX::Color::LutBase* _srgbLut;
 };
 
