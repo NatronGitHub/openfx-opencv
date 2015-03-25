@@ -333,7 +333,15 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
     assert(dst->getPixelComponents() == OFX::ePixelComponentRGBA);
     const int nComponents = 4;
 
-    cv::Mat flow(renderWindow.y2 - renderWindow.y1, renderWindow.x2 - renderWindow.x1, CV_32FC2);
+
+    const OfxRectI& refBounds = ref->getBounds();
+    const OfxRectI& otherBounds = ref->getBounds();
+    OfxRectI bounds;
+    bounds.x1 = std::min(refBounds.x1, otherBounds.x1);
+    bounds.x2 = std::max(refBounds.x2, otherBounds.x2);
+    bounds.y1 = std::min(refBounds.y1, otherBounds.y1);
+    bounds.y2 = std::max(refBounds.y2, otherBounds.y2);
+    cv::Mat flow(bounds.y2 - bounds.y1, bounds.x2 - bounds.x1, CV_32FC2);
 
     if (method == eOpticalFlowFarneback) {
         // works in grayscale
@@ -342,6 +350,8 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         fetchCVImage8UGrayscale(other, renderWindow, true, &srcOther);
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+        copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
+        copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
 
         int nbLevels;// = 3;
         double pyrScale = 0.5;
@@ -364,6 +374,8 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         fetchCVImage8U(other, renderWindow, true, &srcOther, ePixelComponentRGB);
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+        copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
+        copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
 
         int nbLayers;// = 3;
         int avgBlockSize;// = 2;
@@ -381,6 +393,8 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         fetchCVImage8UGrayscale(other, renderWindow, true, &srcOther);
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+        copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
+        copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
 
         Ptr<DenseOpticalFlow> tvl1 = createOptFlow_DualTVL1();
         double tau,lambda,theta,epsilon;
@@ -414,12 +428,14 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
     int dstElemCount = dst->getRowBytes() / sizeof(float);
     int flowElemCount = flowImg.widthStep / sizeof(float);
     float* dst_pixels = (float*)dst->getPixelAddress(renderWindow.x1, renderWindow.y1);
-    const float* src_pixels = reinterpret_cast<const float*>(flowImg.imageData);
+    const float* src_pixels = (reinterpret_cast<const float*>(flowImg.imageData) +
+                               (renderWindow.x1 - bounds.x1) +
+                               (renderWindow.y1 - bounds.y1) * flowElemCount);
     assert(dst_pixels && src_pixels);
 
 
-    for (int y = 0; y < flowImg.height; ++y) {
-        for (int x = 0; x < flowImg.width; ++x) {
+    for (int y = renderWindow.y1; y < renderWindow.y2; ++y) {
+        for (int x = renderWindow.x1; x < renderWindow.x2; ++x) {
             for (int coord = 0; coord < 2; ++coord) {
                 float v = src_pixels[x * 2 + coord] / (coord == 0 ? renderScale.x : renderScale.y);
                 for (int k = 0; k < channelIndex[coord].size(); ++k) {
