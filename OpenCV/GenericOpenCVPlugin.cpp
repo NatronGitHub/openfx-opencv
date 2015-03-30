@@ -50,9 +50,9 @@ void
 CVImageWrapper::initialize(OFX::ImageEffect* instance,
                            const OfxRectI & bounds,
                            OFX::PixelComponentEnum pixelComponents,
+                           int pixelComponentCount,
                            OFX::BitDepthEnum bitDepth)
 {
-    int channels = OFX::getNComponents(pixelComponents);
     int depth;
 
     switch (bitDepth) {
@@ -75,7 +75,7 @@ CVImageWrapper::initialize(OFX::ImageEffect* instance,
 
     _cvImgHeader = cvCreateImageHeader(imageSize,
                                        depth,
-                                       channels);
+                                       pixelComponentCount);
 
     _mem.reset( new ImageMemory(_cvImgHeader->imageSize,instance) );
 
@@ -108,7 +108,8 @@ GenericOpenCVPlugin::fetchCVImage8U(const OFX::Image* img,
                                     const OfxRectI & renderWindow,
                                     bool copyData,
                                     CVImageWrapper* dstImg,
-                                    OFX::PixelComponentEnum dstPixelComponents)
+                                    OFX::PixelComponentEnum dstPixelComponents,
+                                    int dstPixelComponentCount)
 {
     const void* pixelData = NULL;
     OfxRectI bounds;
@@ -117,14 +118,16 @@ GenericOpenCVPlugin::fetchCVImage8U(const OFX::Image* img,
     int rowBytes;
 
     getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
+    int pixelComponentCount = img->getPixelComponentCount();
 
     const OfxRectI &dstBounds = renderWindow;
-    if (dstPixelComponents == ePixelComponentNone) {
+    if (dstPixelComponents == ePixelComponentNone && dstPixelComponentCount == 0) {
         dstPixelComponents = pixelComponents;
+        dstPixelComponentCount = pixelComponentCount;
     }
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    dstImg->initialize(this, dstBounds, dstPixelComponents, dstBitDepth);
+    dstImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth);
     unsigned char* dstPixelData = dstImg->getData();
     int dstRowBytes = dstImg->getIplImage()->widthStep;
 
@@ -133,9 +136,9 @@ GenericOpenCVPlugin::fetchCVImage8U(const OFX::Image* img,
         convertWindow.x1 = convertWindow.y1 = 0;
         convertWindow.x2 = renderWindow.x2 - renderWindow.x1;
         convertWindow.y2 = renderWindow.y2 - renderWindow.y1;
-        _srgbLut->to_byte_packed_nodither(pixelData, bounds, pixelComponents, bitDepth, rowBytes,
+        _srgbLut->to_byte_packed_nodither(pixelData, bounds, pixelComponents, pixelComponentCount, bitDepth, rowBytes,
                                           renderWindow,
-                                          dstPixelData, dstBounds, dstPixelComponents, dstBitDepth, dstRowBytes);
+                                          dstPixelData, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth, dstRowBytes);
     }
 }
 
@@ -152,12 +155,14 @@ GenericOpenCVPlugin::fetchCVImage8UGrayscale(const OFX::Image* img,
     int rowBytes;
 
     getImageData(img, &pixelData, &bounds, &pixelComponents, &bitDepth, &rowBytes);
+    int pixelComponentCount = img->getPixelComponentCount();
     assert(pixelComponents == ePixelComponentRGBA || pixelComponents == ePixelComponentRGB);
     const OfxRectI &dstBounds = renderWindow;
     const OFX::PixelComponentEnum dstPixelComponents = ePixelComponentAlpha;
+    const int dstPixelComponentCount = 1;
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    cvImg->initialize(this, dstBounds, dstPixelComponents, dstBitDepth);
+    cvImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth);
     unsigned char* dstPixelData = cvImg->getData();
     int dstRowBytes = cvImg->getIplImage()->widthStep;
 
@@ -166,9 +171,9 @@ GenericOpenCVPlugin::fetchCVImage8UGrayscale(const OFX::Image* img,
         convertWindow.x1 = convertWindow.y1 = 0;
         convertWindow.x2 = renderWindow.x2 - renderWindow.x1;
         convertWindow.y2 = renderWindow.y2 - renderWindow.y1;
-        _srgbLut->to_byte_grayscale_nodither(pixelData, bounds, pixelComponents, bitDepth, rowBytes,
+        _srgbLut->to_byte_grayscale_nodither(pixelData, bounds, pixelComponents, pixelComponentCount, bitDepth, rowBytes,
                                              renderWindow,
-                                             dstPixelData, dstBounds, dstPixelComponents, dstBitDepth, dstRowBytes);
+                                             dstPixelData, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth, dstRowBytes);
     }
 }
 
@@ -186,6 +191,7 @@ GenericOpenCVPlugin::cvImageToOfxImage(const CVImageWrapper & cvImg,
     void* pixelData = cvImg.getData();
     const OfxRectI & bounds = renderWindow;
     OFX::PixelComponentEnum pixelComponents = ePixelComponentNone;
+    int pixelComponentCount = img->nChannels;
     switch (img->nChannels) {
     case 1:
         pixelComponents = ePixelComponentAlpha;
@@ -209,10 +215,11 @@ GenericOpenCVPlugin::cvImageToOfxImage(const CVImageWrapper & cvImg,
     OFX::BitDepthEnum dstBitDepth;
     int dstRowBytes;
     getImageData(dstImg, &dstPixelData, &dstBounds, &dstPixelComponents, &dstBitDepth, &dstRowBytes);
+    int dstPixelComponentCount = dstImg->getPixelComponentCount();
 
-    _srgbLut->from_byte_packed(pixelData, bounds, pixelComponents, bitDepth, rowBytes,
+    _srgbLut->from_byte_packed(pixelData, bounds, pixelComponents, pixelComponentCount, bitDepth, rowBytes,
                                renderWindow,
-                               dstPixelData, dstBounds, dstPixelComponents, dstBitDepth, dstRowBytes);
+                               dstPixelData, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth, dstRowBytes);
 }
 
 void

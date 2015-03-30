@@ -58,7 +58,7 @@ public:
 
     ~CVImageWrapper();
 
-    void initialize(OFX::ImageEffect* instance, const OfxRectI & bounds, OFX::PixelComponentEnum pixelComponents, OFX::BitDepthEnum bitDepth);
+    void initialize(OFX::ImageEffect* instance, const OfxRectI & bounds, OFX::PixelComponentEnum pixelComponents, int pixelComponentCount, OFX::BitDepthEnum bitDepth);
 
     unsigned char* getData() const;
     IplImage* getIplImage() const
@@ -92,7 +92,7 @@ private:
 
 protected:
 
-    void fetchCVImage8U(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* dstImg, OFX::PixelComponentEnum dstPixelComponents = OFX::ePixelComponentNone);
+    void fetchCVImage8U(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* dstImg, OFX::PixelComponentEnum dstPixelComponents = OFX::ePixelComponentNone, int dstPixelComponentCount = 0);
 
     void fetchCVImage8UGrayscale(const OFX::Image* img, const OfxRectI & renderWindow, bool copyData, CVImageWrapper* dstImg);
 
