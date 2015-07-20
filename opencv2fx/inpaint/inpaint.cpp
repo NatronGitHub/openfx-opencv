@@ -82,6 +82,11 @@
 #include "ofxPixels.h"
 #include "opencv2fx.h"
 
+
+#if CV_MAJOR_VERSION >= 3
+#error "This code won't work with OpenCV3 since it uses the - now gone for good - opencv-legacy module"
+#endif
+
 #define INPAINT_RADIUS "threshold1"
 #define DILATION "threshold2"
 #define INPAINT_NOISE "inpaintnoise"
