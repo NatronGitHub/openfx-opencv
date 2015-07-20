@@ -227,13 +227,15 @@ GenericOpenCVPlugin::fetchCVImage8UGrayscale(const OFX::Image* img,
     //Force 8bit for OpenCV images
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    cvImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, rowBytes, dstBitDepth);
+    int expectedRowBytes = rowBytes / pixelComponentCount;
+    
+    cvImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, expectedRowBytes, dstBitDepth);
     unsigned char* dstPixelData = cvImg->getData();
     
 #if CV_MAJOR_VERSION < 3
     int dstRowBytes = cvImg->getIplImage()->widthStep;
 #else
-    int dstRowBytes = rowBytes;
+    int dstRowBytes = expectedRowBytes;
 #endif
 
     if (copyData) {

@@ -76,8 +76,13 @@
 
 #include <ofxsLut.h>
 //#include <ofxsCopier.h>
+
+#if CV_MAJOR_VERSION >= 3
 #include <opencv2/video.hpp>
 #include <opencv2/superres.hpp>
+#else
+#define VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#endif
 
 #define kPluginName "VectorGeneratorOFX"
 #define kPluginGrouping "Time"
@@ -247,9 +252,13 @@ public:
         _iteratrions = fetchIntParam(kParamIterations);
         _neighborhood = fetchIntParam(kParamPixelNeighborhood);
         _sigma = fetchDoubleParam(kParamSigma);
+        
+#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
         _layers = fetchIntParam(kParamLayers);
         _blockSize = fetchIntParam(kParamBlockSize);
         _maxFlow = fetchIntParam(kParamMaxFlow);
+#endif
+        
         _tau = fetchDoubleParam(kParamTau);
         _lambda = fetchDoubleParam(kParamLambda);
         _theta = fetchDoubleParam(kParamTheta);
@@ -257,7 +266,11 @@ public:
         _warps = fetchIntParam(kParamWarps);
         _epsilon = fetchDoubleParam(kParamEpsilon);
         
-        assert(_levels && _iteratrions && _neighborhood && _sigma && _layers && _blockSize && _maxFlow && _tau && _lambda && _theta && _nScales && _warps && _epsilon);
+        assert(_levels && _iteratrions && _neighborhood && _sigma &&
+#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+               _layers && _blockSize && _maxFlow &&
+#endif
+               _tau && _lambda && _theta && _nScales && _warps && _epsilon);
 
         int method_i;
         _method->getValue(method_i);
@@ -617,10 +630,12 @@ VectorGeneratorPlugin::updateVisibility(OpticalFlowMethodEnum method)
     _neighborhood->setIsSecret(method != eOpticalFlowFarneback);
     _sigma->setIsSecret(method != eOpticalFlowFarneback);
 
+#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
     _layers->setIsSecret(method != eOpticalFlowSimpleFlow);
     _blockSize->setIsSecret(method != eOpticalFlowSimpleFlow);
     _maxFlow->setIsSecret(method != eOpticalFlowSimpleFlow);
-
+#endif
+    
     _tau->setIsSecret(method != eOpticalFlowDualTVL1);
     _lambda->setIsSecret(method != eOpticalFlowDualTVL1);
     _theta->setIsSecret(method != eOpticalFlowDualTVL1);
@@ -755,13 +770,10 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         ChoiceParamDescriptor *param = desc.defineChoiceParam(kParamMethod);
         param->setLabels(kParamMethodLabel, kParamMethodLabel, kParamMethodLabel);
         param->setHint(kParamMethodHint);
-        assert(param->getNOptions() == eOpticalFlowFarneback);
         param->appendOption("Farneback");
-#if CV_MAJOR_VERSION < 3
-        assert(param->getNOptions() == eOpticalFlowSimpleFlow);
+#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
         param->appendOption("Simple flow");
 #endif
-        assert(param->getNOptions() == eOpticalFlowDualTVL1);
         param->appendOption("Dual TV L1");
         param->setDefault((int)defaultMethod);
         param->setAnimates(false);
@@ -808,6 +820,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         page->addChild(*param);
     }
 
+#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
@@ -838,6 +851,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setAnimates(true);
         page->addChild(*param);
     }
+#endif
 
     //Dual TV L1
     {
