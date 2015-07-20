@@ -40,9 +40,13 @@
 using namespace OFX;
 
 
-CVImageWrapper::CVImageWrapper()
-    : _cvImgHeader(0)
-      , _mem(0)
+CVImageWrapper::CVImageWrapper():
+#if CV_MAJOR_VERSION < 3
+_cvImgHeader(0),
+#else
+_cvMat(0),
+#endif
+_mem(0)
 {
 }
 
@@ -51,10 +55,13 @@ CVImageWrapper::initialize(OFX::ImageEffect* instance,
                            const OfxRectI & bounds,
                            OFX::PixelComponentEnum pixelComponents,
                            int pixelComponentCount,
+                           unsigned int rowBytes,
                            OFX::BitDepthEnum bitDepth)
 {
     int depth;
-
+    std::size_t bytes;
+#if CV_MAJOR_VERSION < 3
+    (void)rowBytes;
     switch (bitDepth) {
     case eBitDepthUByte:
         depth = IPL_DEPTH_8U;
@@ -72,25 +79,74 @@ CVImageWrapper::initialize(OFX::ImageEffect* instance,
     CvSize imageSize = cvSize(bounds.x2 - bounds.x1,
                               bounds.y2 - bounds.y1);
 
-
     _cvImgHeader = cvCreateImageHeader(imageSize,
                                        depth,
                                        pixelComponentCount);
+    bytes = _cvImgHeader->imageSize;
 
-    _mem.reset( new ImageMemory(_cvImgHeader->imageSize,instance) );
+#else
+    
+    switch (bitDepth) {
+        case eBitDepthUByte:
+            depth = CV_8U;
+            break;
+        case eBitDepthUShort:
+            depth = CV_16U;
+            break;
+        case eBitDepthFloat:
+            depth = CV_32F;
+            break;
+        default:
+            throwSuiteStatusException(kOfxStatErrImageFormat);
+            return;
+    }
+    
+    switch (pixelComponentCount) {
+        case 1:
+            depth = CV_MAKETYPE(depth, 1);
+            break;
+        case 2:
+            depth = CV_MAKETYPE(depth, 2);
+            break;
+        case 3:
+            depth = CV_MAKETYPE(depth, 3);
+            break;
+        case 4:
+            depth = CV_MAKETYPE(depth, 4);
+            break;
+        default:
+            assert(false);
+            break;
+    }
+    bytes = rowBytes * (bounds.y2 - bounds.y1);
+#endif
 
+    _mem.reset( new ImageMemory(bytes,instance) );
+
+#if CV_MAJOR_VERSION < 3
     _cvImgHeader->imageData = (char*) _mem->lock();
+#else
+    _cvMat = new cv::Mat(bounds.y2 - bounds.y1, bounds.x2 - bounds.x1, depth, _mem->lock(),rowBytes);
+#endif
 }
 
 CVImageWrapper::~CVImageWrapper()
 {
+#if CV_MAJOR_VERSION < 3
     cvReleaseImageHeader(&_cvImgHeader);
+#else
+    delete _cvMat;
+#endif
 }
 
 unsigned char*
 CVImageWrapper::getData() const
 {
+#if CV_MAJOR_VERSION < 3
     return (unsigned char*)_cvImgHeader->imageData;
+#else
+    return  _cvMat->data;
+#endif
 }
 
 GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
@@ -125,12 +181,19 @@ GenericOpenCVPlugin::fetchCVImage8U(const OFX::Image* img,
         dstPixelComponents = pixelComponents;
         dstPixelComponentCount = pixelComponentCount;
     }
+    
+    //Force 8bit for OpenCV images
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    dstImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth);
+    dstImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, rowBytes, dstBitDepth);
     unsigned char* dstPixelData = dstImg->getData();
+    
+#if CV_MAJOR_VERSION < 3
     int dstRowBytes = dstImg->getIplImage()->widthStep;
-
+#else
+    int dstRowBytes = rowBytes;
+#endif
+    
     if (copyData) {
         OfxRectI convertWindow;
         convertWindow.x1 = convertWindow.y1 = 0;
@@ -160,11 +223,18 @@ GenericOpenCVPlugin::fetchCVImage8UGrayscale(const OFX::Image* img,
     const OfxRectI &dstBounds = renderWindow;
     const OFX::PixelComponentEnum dstPixelComponents = ePixelComponentAlpha;
     const int dstPixelComponentCount = 1;
+    
+    //Force 8bit for OpenCV images
     const OFX::BitDepthEnum dstBitDepth = eBitDepthUByte;
 
-    cvImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, dstBitDepth);
+    cvImg->initialize(this, dstBounds, dstPixelComponents, dstPixelComponentCount, rowBytes, dstBitDepth);
     unsigned char* dstPixelData = cvImg->getData();
+    
+#if CV_MAJOR_VERSION < 3
     int dstRowBytes = cvImg->getIplImage()->widthStep;
+#else
+    int dstRowBytes = rowBytes;
+#endif
 
     if (copyData) {
         OfxRectI convertWindow;
@@ -182,33 +252,48 @@ GenericOpenCVPlugin::cvImageToOfxImage(const CVImageWrapper & cvImg,
                                        const OfxRectI & renderWindow,
                                        OFX::Image* dstImg)
 {
+    void* pixelData = cvImg.getData();
+    const OfxRectI & bounds = renderWindow;
+    int rowBytes;
+    int pixelComponentCount;
+    
+#if CV_MAJOR_VERSION < 3
+    rowBytes = (int)img->widthStep;
     const IplImage* img = cvImg.getIplImage();
-
     assert( (renderWindow.x2 - renderWindow.x1) == img->width &&
             (renderWindow.y2 - renderWindow.y1) == img->height &&
             img->depth == IPL_DEPTH_8U &&
             (img->nChannels == 1 || img->nChannels == 3 || img->nChannels == 4) );
-    void* pixelData = cvImg.getData();
-    const OfxRectI & bounds = renderWindow;
+    pixelComponentCount = img->nChannels;
+    
+#else
+    cv::Mat* img = cvImg.getCvMat();
+    rowBytes = (int)img->step[0];
+    pixelComponentCount = img->channels();
+    assert((renderWindow.x2 - renderWindow.x1) == img->cols &&
+           (renderWindow.y2 - renderWindow.y1) == img->rows &&
+           img->depth() == CV_8U &&
+           (pixelComponentCount == 1 || pixelComponentCount == 3 || pixelComponentCount == 4));
+#endif
+    
     OFX::PixelComponentEnum pixelComponents = ePixelComponentNone;
-    int pixelComponentCount = img->nChannels;
-    switch (img->nChannels) {
-    case 1:
-        pixelComponents = ePixelComponentAlpha;
-        break;
-    case 3:
-        pixelComponents = ePixelComponentRGB;
-        break;
-    case 4:
-        pixelComponents = ePixelComponentRGBA;
-        break;
-    default:
-        throwSuiteStatusException(kOfxStatErrImageFormat);
-
-        return;
+    
+    switch (pixelComponentCount) {
+        case 1:
+            pixelComponents = ePixelComponentAlpha;
+            break;
+        case 3:
+            pixelComponents = ePixelComponentRGB;
+            break;
+        case 4:
+            pixelComponents = ePixelComponentRGBA;
+            break;
+        default:
+            throwSuiteStatusException(kOfxStatErrImageFormat);
+            
+            return;
     }
     OFX::BitDepthEnum bitDepth = eBitDepthUByte;
-    int rowBytes = img->widthStep;
     void* dstPixelData;
     OfxRectI dstBounds;
     OFX::PixelComponentEnum dstPixelComponents;

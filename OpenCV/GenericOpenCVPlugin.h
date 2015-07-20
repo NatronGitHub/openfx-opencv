@@ -58,17 +58,35 @@ public:
 
     ~CVImageWrapper();
 
-    void initialize(OFX::ImageEffect* instance, const OfxRectI & bounds, OFX::PixelComponentEnum pixelComponents, int pixelComponentCount, OFX::BitDepthEnum bitDepth);
+    void initialize(OFX::ImageEffect* instance,
+                    const OfxRectI & bounds,
+                    OFX::PixelComponentEnum pixelComponents,
+                    int pixelComponentCount,
+                    unsigned int rowBytes,
+                    OFX::BitDepthEnum bitDepth);
 
     unsigned char* getData() const;
+    
+#if CV_MAJOR_VERSION < 3
     IplImage* getIplImage() const
     {
         return _cvImgHeader;
     }
+#else
+    
+    cv::Mat* getCvMat() const
+    {
+        return _cvMat;
+    }
+#endif
 
 private:
 
+#if CV_MAJOR_VERSION < 3
     IplImage* _cvImgHeader;
+#else
+    cv::Mat* _cvMat;
+#endif
     std::auto_ptr<OFX::ImageMemory> _mem;
 };
 

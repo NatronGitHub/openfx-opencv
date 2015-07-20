@@ -76,6 +76,8 @@
 
 #include <ofxsLut.h>
 //#include <ofxsCopier.h>
+#include <opencv2/video.hpp>
+#include <opencv2/superres.hpp>
 
 #define kPluginName "VectorGeneratorOFX"
 #define kPluginGrouping "Time"
@@ -348,11 +350,17 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         CVImageWrapper srcRef, srcOther;
         fetchCVImage8UGrayscale(ref, renderWindow, true, &srcRef);
         fetchCVImage8UGrayscale(other, renderWindow, true, &srcOther);
+#if CV_MAJOR_VERSION >= 3
+        cv::Mat srcRefMatImg = *srcRef.getCvMat();
+        cv::Mat srcOtherMatImg = *srcOther.getCvMat();
+#else
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+#endif
+
         copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
         copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
-
+        
         int nbLevels;// = 3;
         double pyrScale = 0.5;
         int nbIterations;// = 15;
@@ -367,13 +375,24 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         assert(srcRefMatImg.channels() == 1 && srcOtherMatImg.channels() == 1);
 
         calcOpticalFlowFarneback(srcRefMatImg, srcOtherMatImg, flow, pyrScale, nbLevels, winSize, nbIterations, polyN, polySigma, 0);
-    } else if (method == eOpticalFlowSimpleFlow) {
+//#endif
+        
+    }
+    
+    
+#if CV_MAJOR_VERSION < 3
+    //Simple flow is commented out in openCV3 for now
+    else if (method == eOpticalFlowSimpleFlow) {
         // works in color
         CVImageWrapper srcRef,srcOther;
         fetchCVImage8U(ref, renderWindow, true, &srcRef, ePixelComponentRGB);
         fetchCVImage8U(other, renderWindow, true, &srcOther, ePixelComponentRGB);
+        
+
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+        
+        
         copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
         copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
 
@@ -386,17 +405,29 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         assert(srcRefMatImg.cols == flow.cols && srcRefMatImg.rows == flow.rows && srcOtherMatImg.cols == flow.cols && srcOtherMatImg.rows == flow.rows);
         assert(srcRefMatImg.channels() == 3 && srcOtherMatImg.channels() == 3);
         calcOpticalFlowSF(srcRefMatImg, srcOtherMatImg, flow, nbLayers, avgBlockSize, maxFlow);
-    } else if (method == eOpticalFlowDualTVL1) {
+    }
+#endif
+    else if (method == eOpticalFlowDualTVL1) {
         // works in grayscale
         CVImageWrapper srcRef,srcOther;
         fetchCVImage8UGrayscale(ref, renderWindow, true, &srcRef);
         fetchCVImage8UGrayscale(other, renderWindow, true, &srcOther);
+        
+#if CV_MAJOR_VERSION >= 3
+        cv::Mat srcRefMatImg(*srcRef.getCvMat());
+        cv::Mat srcOtherMatImg(*srcOther.getCvMat());
+#else
         cv::Mat srcRefMatImg(srcRef.getIplImage(), false /*copyData*/);
         cv::Mat srcOtherMatImg(srcOther.getIplImage(), false /*copyData*/);
+#endif
         copyMakeBorder(srcRefMatImg, srcRefMatImg, refBounds.y1 - bounds.y1, bounds.y2 - refBounds.y2, refBounds.x1 - bounds.x1, bounds.x2 - refBounds.x2, BORDER_REPLICATE);
         copyMakeBorder(srcOtherMatImg, srcOtherMatImg, otherBounds.y1 - bounds.y1, bounds.y2 - otherBounds.y2, otherBounds.x1 - bounds.x1, bounds.x2 - otherBounds.x2, BORDER_REPLICATE);
 
+#if CV_MAJOR_VERSION < 3
         Ptr<DenseOpticalFlow> tvl1 = createOptFlow_DualTVL1();
+#else
+        Ptr<DualTVL1OpticalFlow> tvl1 = createOptFlow_DualTVL1();
+#endif
         double tau,lambda,theta,epsilon;
         int nScales,warps,iterations;
         
@@ -410,7 +441,7 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         _iteratrions->getValue(iterations);
         assert(srcRefMatImg.cols == flow.cols && srcRefMatImg.rows == flow.rows && srcOtherMatImg.cols == flow.cols && srcOtherMatImg.rows == flow.rows);
         assert(srcRefMatImg.channels() == 1 && srcOtherMatImg.channels() == 1);
-
+#if CV_MAJOR_VERSION < 3
         tvl1->set("tau",tau /*0.25*/);
         tvl1->set("lambda",lambda /*0.15*/);
         tvl1->set("theta",theta /*0.3*/);
@@ -418,6 +449,15 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         tvl1->set("warps", warps/*5*/);
         tvl1->set("epsilon", epsilon/*0.01*/);
         tvl1->set("iterations", iterations/*300*/);
+#else
+        tvl1->setTau(tau);
+        tvl1->setLambda(lambda);
+        tvl1->setTheta(theta);
+        tvl1->setScalesNumber(nScales);
+        tvl1->setWarpingsNumber(warps);
+        tvl1->setEpsilon(epsilon);
+        tvl1->setInnerIterations(iterations);
+#endif
         tvl1->calc(srcRefMatImg,srcOtherMatImg,flow);
     }
 
@@ -717,8 +757,10 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setHint(kParamMethodHint);
         assert(param->getNOptions() == eOpticalFlowFarneback);
         param->appendOption("Farneback");
+#if CV_MAJOR_VERSION < 3
         assert(param->getNOptions() == eOpticalFlowSimpleFlow);
         param->appendOption("Simple flow");
+#endif
         assert(param->getNOptions() == eOpticalFlowDualTVL1);
         param->appendOption("Dual TV L1");
         param->setDefault((int)defaultMethod);

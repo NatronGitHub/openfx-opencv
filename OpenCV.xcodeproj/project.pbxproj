@@ -47,7 +47,6 @@
 		1E92F5591A1FA59900AD0267 /* libopencv_core.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46935917C746E20073A6EF /* libopencv_core.dylib */; };
 		1E92F55A1A1FA59900AD0267 /* libopencv_imgproc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46935F17C7478C0073A6EF /* libopencv_imgproc.dylib */; };
 		1E92F55B1A1FA59900AD0267 /* libopencv_video.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AC32DB261A1F427800918802 /* libopencv_video.dylib */; };
-		1E92F55C1A1FA59900AD0267 /* libopencv_legacy.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46935C17C7471D0073A6EF /* libopencv_legacy.dylib */; };
 		1E92F5621A1FA8B600AD0267 /* PluginRegistrationCombined.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACAD404B1A1E5885002EB36F /* PluginRegistrationCombined.cpp */; };
 		AC32DB251A1F41A900918802 /* libopencv_imgproc.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E46935F17C7478C0073A6EF /* libopencv_imgproc.dylib */; };
 		AC32DB271A1F427800918802 /* libopencv_video.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AC32DB261A1F427800918802 /* libopencv_video.dylib */; };
@@ -179,7 +178,6 @@
 				1E92F5591A1FA59900AD0267 /* libopencv_core.dylib in Frameworks */,
 				1E92F55A1A1FA59900AD0267 /* libopencv_imgproc.dylib in Frameworks */,
 				1E92F55B1A1FA59900AD0267 /* libopencv_video.dylib in Frameworks */,
-				1E92F55C1A1FA59900AD0267 /* libopencv_legacy.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
