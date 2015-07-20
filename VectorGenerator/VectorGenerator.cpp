@@ -253,7 +253,7 @@ public:
         _neighborhood = fetchIntParam(kParamPixelNeighborhood);
         _sigma = fetchDoubleParam(kParamSigma);
         
-#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#ifdef VECTOR_GENERATOR_WITH_SIMPLE_FLOW
         _layers = fetchIntParam(kParamLayers);
         _blockSize = fetchIntParam(kParamBlockSize);
         _maxFlow = fetchIntParam(kParamMaxFlow);
@@ -267,7 +267,7 @@ public:
         _epsilon = fetchDoubleParam(kParamEpsilon);
         
         assert(_levels && _iteratrions && _neighborhood && _sigma &&
-#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#ifdef VECTOR_GENERATOR_WITH_SIMPLE_FLOW
                _layers && _blockSize && _maxFlow &&
 #endif
                _tau && _lambda && _theta && _nScales && _warps && _epsilon);
@@ -630,7 +630,7 @@ VectorGeneratorPlugin::updateVisibility(OpticalFlowMethodEnum method)
     _neighborhood->setIsSecret(method != eOpticalFlowFarneback);
     _sigma->setIsSecret(method != eOpticalFlowFarneback);
 
-#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#ifdef VECTOR_GENERATOR_WITH_SIMPLE_FLOW
     _layers->setIsSecret(method != eOpticalFlowSimpleFlow);
     _blockSize->setIsSecret(method != eOpticalFlowSimpleFlow);
     _maxFlow->setIsSecret(method != eOpticalFlowSimpleFlow);
@@ -771,7 +771,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         param->setLabels(kParamMethodLabel, kParamMethodLabel, kParamMethodLabel);
         param->setHint(kParamMethodHint);
         param->appendOption("Farneback");
-#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#ifdef VECTOR_GENERATOR_WITH_SIMPLE_FLOW
         param->appendOption("Simple flow");
 #endif
         param->appendOption("Dual TV L1");
@@ -820,7 +820,7 @@ VectorGeneratorPluginFactory::describeInContext(OFX::ImageEffectDescriptor &desc
         page->addChild(*param);
     }
 
-#if VECTOR_GENERATOR_WITH_SIMPLE_FLOW
+#ifdef VECTOR_GENERATOR_WITH_SIMPLE_FLOW
     //Simple flow
     {
         IntParamDescriptor *param = desc.defineIntParam(kParamLayers);
