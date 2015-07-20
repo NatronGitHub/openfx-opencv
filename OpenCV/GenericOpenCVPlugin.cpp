@@ -260,8 +260,8 @@ GenericOpenCVPlugin::cvImageToOfxImage(const CVImageWrapper & cvImg,
     int pixelComponentCount;
     
 #if CV_MAJOR_VERSION < 3
-    rowBytes = (int)img->widthStep;
     const IplImage* img = cvImg.getIplImage();
+    rowBytes = (int)img->widthStep;
     assert( (renderWindow.x2 - renderWindow.x1) == img->width &&
             (renderWindow.y2 - renderWindow.y1) == img->height &&
             img->depth == IPL_DEPTH_8U &&
