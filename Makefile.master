@@ -5,6 +5,6 @@ include $(PATHTOROOT)/Plugins/Makefile.master
 CXXFLAGS += -DOFX_EXTENSIONS_VEGAS -DOFX_EXTENSIONS_NUKE
 
 CXXFLAGS += -I../OpenCV -I../SupportExt
-CXXFLAGS += `pkg-config opencv --cflags`
-LINKFLAGS += `pkg-config opencv --libs`
+CXXFLAGS += $(shell pkg-config opencv --cflags)
+LINKFLAGS += $(shell pkg-config opencv --libs)
 VPATH += ../OpenCV ../SupportExt
