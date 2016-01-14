@@ -1,7 +1,7 @@
 PLUGINOBJECTS = \
 VectorGenerator.o \
 GenericOpenCVPlugin.o \
-PluginRegistrationCombined.o
+ofxsLut.o
 
 PLUGINNAME = Misc
 

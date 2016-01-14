@@ -920,11 +920,6 @@ VectorGeneratorPluginFactory::createInstance(OfxImageEffectHandle handle,
     return new VectorGeneratorPlugin(handle);
 }
 
-void
-getVectorGeneratorPluginID(OFX::PluginFactoryArray &ids)
-{
-    static VectorGeneratorPluginFactory p(kPluginIdentifier, kPluginVersionMajor, kPluginVersionMinor);
-
-    ids.push_back(&p);
-}
+static VectorGeneratorPluginFactory p(kPluginIdentifier, kPluginVersionMajor, kPluginVersionMinor);
+mRegisterPluginFactoryInstance(p)
 
