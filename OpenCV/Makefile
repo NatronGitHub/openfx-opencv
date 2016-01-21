@@ -3,18 +3,20 @@ VectorGenerator.o \
 GenericOpenCVPlugin.o \
 ofxsLut.o
 
-PLUGINNAME = Misc
+PLUGINNAME = OpenCV
 
 # ls */*png|sed -e 's!^!../!' -e 's!$! \\!'
 RESOURCES = \
 #../VectorGenerator/net.sf.openfx.VectorGenerator.png \
 
-VPATH += \
-../VectorGenerator
+TOP_SRCDIR = ..
 
-include ../Makefile.master
+VPATH += \
+$(TOP_SRCDIR)/VectorGenerator
+
+include $(TOP_SRCDIR)/Makefile.master
 
 CXXFLAGS += \
 -I. \
--I../VectorGenerator
+-I$(TOP_SRCDIR)/VectorGenerator
 
