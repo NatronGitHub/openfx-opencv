@@ -36,6 +36,20 @@
 #include "GenericOpenCVPlugin.h"
 #include "ofxsPixelProcessor.h"
 #include "ofxsLut.h"
+#ifdef OFX_USE_MULTITHREAD_MUTEX
+namespace {
+typedef OFX::MultiThread::Mutex Mutex;
+typedef OFX::MultiThread::AutoMutex AutoMutex;
+}
+#else
+// some OFX hosts do not have mutex handling in the MT-Suite (e.g. Sony Catalyst Edit)
+// prefer using the fast mutex by Marcus Geelnard http://tinythreadpp.bitsnbites.eu/
+#include "fast_mutex.h"
+namespace {
+typedef tthread::fast_mutex Mutex;
+typedef OFX::MultiThread::AutoMutexT<tthread::fast_mutex> AutoMutex;
+}
+#endif
 
 using namespace OFX;
 
@@ -153,7 +167,7 @@ GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
       , _dstClip(0)
       , _srcClip(0)
-      , _srgbLut( OFX::Color::LutManager::sRGBLut<OFX::MultiThread::Mutex>() )
+      , _srgbLut( OFX::Color::LutManager::sRGBLut<Mutex>() )
 {
     _dstClip = fetchClip(kOfxImageEffectOutputClipName);
     _srcClip = fetchClip(kOfxImageEffectSimpleSourceClipName);
