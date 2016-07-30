@@ -167,7 +167,7 @@ GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
     : ImageEffect(handle)
       , _dstClip(0)
       , _srcClip(0)
-      , _srgbLut( OFX::Color::LutManager::sRGBLut<Mutex>() )
+      , _srgbLut( OFX::Color::LutManager<Mutex>::sRGBLut() )
 {
     _dstClip = fetchClip(kOfxImageEffectOutputClipName);
     _srcClip = fetchClip(kOfxImageEffectSimpleSourceClipName);

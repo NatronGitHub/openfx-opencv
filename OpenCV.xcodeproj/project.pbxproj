@@ -89,6 +89,30 @@
 		1E46935F17C7478C0073A6EF /* libopencv_imgproc.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_imgproc.dylib; path = lib/libopencv_imgproc.dylib; sourceTree = OPENCV_PATH; };
 		1E46936317C747E80073A6EF /* libopencv_photo.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_photo.dylib; path = lib/libopencv_photo.dylib; sourceTree = OPENCV_PATH; };
 		1E551F5A179950EC00A4135C /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		1E5EBA191D4C8BA70005A5A8 /* fast_mutex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fast_mutex.h; sourceTree = "<group>"; };
+		1E5EBA1A1D4C8BA70005A5A8 /* gpl-header-c.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "gpl-header-c.txt"; sourceTree = "<group>"; };
+		1E5EBA1B1D4C8BA70005A5A8 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		1E5EBA1C1D4C8BA70005A5A8 /* ofxsCoords.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsCoords.h; sourceTree = "<group>"; };
+		1E5EBA1D1D4C8BA70005A5A8 /* ofxsFileOpen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsFileOpen.cpp; sourceTree = "<group>"; };
+		1E5EBA1E1D4C8BA70005A5A8 /* ofxsFileOpen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsFileOpen.h; sourceTree = "<group>"; };
+		1E5EBA1F1D4C8BA70005A5A8 /* ofxsGenerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsGenerator.cpp; sourceTree = "<group>"; };
+		1E5EBA201D4C8BA70005A5A8 /* ofxsMultiPlane.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsMultiPlane.cpp; sourceTree = "<group>"; };
+		1E5EBA211D4C8BA70005A5A8 /* ofxsMultiPlane.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsMultiPlane.h; sourceTree = "<group>"; };
+		1E5EBA221D4C8BA70005A5A8 /* ofxsOGLDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsOGLDebug.h; sourceTree = "<group>"; };
+		1E5EBA231D4C8BA70005A5A8 /* ofxsOGLFunctions_gl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsOGLFunctions_gl.cpp; sourceTree = "<group>"; };
+		1E5EBA241D4C8BA70005A5A8 /* ofxsOGLFunctions_mesa.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsOGLFunctions_mesa.cpp; sourceTree = "<group>"; };
+		1E5EBA251D4C8BA70005A5A8 /* ofxsOGLFunctions-README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "ofxsOGLFunctions-README.md"; sourceTree = "<group>"; };
+		1E5EBA261D4C8BA70005A5A8 /* ofxsOGLFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsOGLFunctions.h; sourceTree = "<group>"; };
+		1E5EBA271D4C8BA70005A5A8 /* ofxsOGLUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsOGLUtilities.cpp; sourceTree = "<group>"; };
+		1E5EBA281D4C8BA70005A5A8 /* ofxsOGLUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsOGLUtilities.h; sourceTree = "<group>"; };
+		1E5EBA291D4C8BA70005A5A8 /* ofxsRamp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsRamp.cpp; sourceTree = "<group>"; };
+		1E5EBA2A1D4C8BA70005A5A8 /* ofxsRamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsRamp.h; sourceTree = "<group>"; };
+		1E5EBA2B1D4C8BA70005A5A8 /* ofxsShutter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsShutter.cpp; sourceTree = "<group>"; };
+		1E5EBA2C1D4C8BA70005A5A8 /* ofxsShutter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsShutter.h; sourceTree = "<group>"; };
+		1E5EBA2D1D4C8BA70005A5A8 /* ofxsTransformInteract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxsTransformInteract.cpp; sourceTree = "<group>"; };
+		1E5EBA2E1D4C8BA70005A5A8 /* ofxsTransformInteract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxsTransformInteract.h; sourceTree = "<group>"; };
+		1E5EBA2F1D4C8BB30005A5A8 /* glad.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = glad.cpp; path = glad/glad.cpp; sourceTree = "<group>"; };
+		1E5EBA301D4C8BB30005A5A8 /* glad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = glad.h; path = glad/glad.h; sourceTree = "<group>"; };
 		1E92F5611A1FA59900AD0267 /* OpenCV.ofx.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenCV.ofx.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC32DB231A1F419000918802 /* libopencv_objdetect.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_objdetect.dylib; path = lib/libopencv_objdetect.dylib; sourceTree = OPENCV_PATH; };
 		AC32DB261A1F427800918802 /* libopencv_video.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopencv_video.dylib; path = lib/libopencv_video.dylib; sourceTree = OPENCV_PATH; };
@@ -326,9 +350,18 @@
 		ACC122D41A1D044900EB64B9 /* SupportExt */ = {
 			isa = PBXGroup;
 			children = (
+				1E5EBA191D4C8BA70005A5A8 /* fast_mutex.h */,
+				1E5EBA2F1D4C8BB30005A5A8 /* glad.cpp */,
+				1E5EBA301D4C8BB30005A5A8 /* glad.h */,
+				1E5EBA1A1D4C8BA70005A5A8 /* gpl-header-c.txt */,
+				1E5EBA1B1D4C8BA70005A5A8 /* LICENSE */,
+				1E5EBA1C1D4C8BA70005A5A8 /* ofxsCoords.h */,
 				ACC122D61A1D044900EB64B9 /* ofxsCopier.h */,
+				1E5EBA1D1D4C8BA70005A5A8 /* ofxsFileOpen.cpp */,
+				1E5EBA1E1D4C8BA70005A5A8 /* ofxsFileOpen.h */,
 				ACC122D71A1D044900EB64B9 /* ofxsFilter.h */,
 				ACC122D81A1D044900EB64B9 /* ofxsFormatResolution.h */,
+				1E5EBA1F1D4C8BA70005A5A8 /* ofxsGenerator.cpp */,
 				ACC122D91A1D044900EB64B9 /* ofxsGenerator.h */,
 				ACC122DA1A1D044900EB64B9 /* ofxsImageBlenderMasked.h */,
 				ACAD40351A1E3D57002EB36F /* ofxsLut.cpp */,
@@ -339,19 +372,34 @@
 				ACC122DE1A1D044900EB64B9 /* ofxsMerging.h */,
 				ACC122DF1A1D044900EB64B9 /* ofxsMipmap.cpp */,
 				ACC122E01A1D044900EB64B9 /* ofxsMipmap.h */,
+				1E5EBA201D4C8BA70005A5A8 /* ofxsMultiPlane.cpp */,
+				1E5EBA211D4C8BA70005A5A8 /* ofxsMultiPlane.h */,
+				1E5EBA221D4C8BA70005A5A8 /* ofxsOGLDebug.h */,
 				ACC122E11A1D044900EB64B9 /* ofxsOGLFontData.cpp */,
 				ACC122E21A1D044900EB64B9 /* ofxsOGLFontUtils.h */,
+				1E5EBA231D4C8BA70005A5A8 /* ofxsOGLFunctions_gl.cpp */,
+				1E5EBA241D4C8BA70005A5A8 /* ofxsOGLFunctions_mesa.cpp */,
+				1E5EBA251D4C8BA70005A5A8 /* ofxsOGLFunctions-README.md */,
+				1E5EBA261D4C8BA70005A5A8 /* ofxsOGLFunctions.h */,
 				ACC122E31A1D044900EB64B9 /* ofxsOGLTextRenderer.cpp */,
 				ACC122E41A1D044900EB64B9 /* ofxsOGLTextRenderer.h */,
+				1E5EBA271D4C8BA70005A5A8 /* ofxsOGLUtilities.cpp */,
+				1E5EBA281D4C8BA70005A5A8 /* ofxsOGLUtilities.h */,
 				ACC122E51A1D044900EB64B9 /* ofxsPixelProcessor.h */,
 				ACC122E61A1D044900EB64B9 /* ofxsPositionInteract.h */,
+				1E5EBA291D4C8BA70005A5A8 /* ofxsRamp.cpp */,
+				1E5EBA2A1D4C8BA70005A5A8 /* ofxsRamp.h */,
 				ACC122E71A1D044900EB64B9 /* ofxsRectangleInteract.cpp */,
 				ACC122E81A1D044900EB64B9 /* ofxsRectangleInteract.h */,
+				1E5EBA2B1D4C8BA70005A5A8 /* ofxsShutter.cpp */,
+				1E5EBA2C1D4C8BA70005A5A8 /* ofxsShutter.h */,
 				ACC122E91A1D044900EB64B9 /* ofxsTracking.cpp */,
 				ACC122EA1A1D044900EB64B9 /* ofxsTracking.h */,
 				ACC122EB1A1D044900EB64B9 /* ofxsTransform3x3.cpp */,
 				ACC122EC1A1D044900EB64B9 /* ofxsTransform3x3.h */,
 				ACC122ED1A1D044900EB64B9 /* ofxsTransform3x3Processor.h */,
+				1E5EBA2D1D4C8BA70005A5A8 /* ofxsTransformInteract.cpp */,
+				1E5EBA2E1D4C8BA70005A5A8 /* ofxsTransformInteract.h */,
 				ACC122EE1A1D044900EB64B9 /* README.md */,
 			);
 			path = SupportExt;
