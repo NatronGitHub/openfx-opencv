@@ -53,6 +53,7 @@ typedef OFX::MultiThread::AutoMutexT<tthread::fast_mutex> AutoMutex;
 
 using namespace OFX;
 
+static OFX::Color::LutManager<Mutex>* gLutManager;
 
 CVImageWrapper::CVImageWrapper():
 #if CV_MAJOR_VERSION < 3
@@ -163,11 +164,11 @@ CVImageWrapper::getData() const
 #endif
 }
 
-GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle)
+GenericOpenCVPlugin::GenericOpenCVPlugin(OfxImageEffectHandle handle, const OFX::Color::Lut* lut_8bit)
     : ImageEffect(handle)
       , _dstClip(0)
       , _srcClip(0)
-      , _srgbLut( OFX::Color::LutManager<Mutex>::sRGBLut() )
+      , _srgbLut(lut_8bit)
 {
     _dstClip = fetchClip(kOfxImageEffectOutputClipName);
     _srcClip = fetchClip(kOfxImageEffectSimpleSourceClipName);

@@ -84,6 +84,11 @@
 #define VECTOR_GENERATOR_WITH_SIMPLE_FLOW
 #endif
 
+using namespace OFX;
+using namespace cv;
+
+OFXS_NAMESPACE_ANONYMOUS_ENTER;
+
 #define kPluginName "VectorGeneratorOFX"
 #define kPluginGrouping "Time"
 #define kPluginDescription "Compute optical flow for the input sequence, using OpenCV."
@@ -205,6 +210,7 @@
 #define kParamEpsilonHint "Stopping criterion theshold which is a trade-off between accuracy and running time. A small value will yield more accurate solutions."
 
 
+
 enum OpticalFlowMethodEnum
 {
     eOpticalFlowFarneback = 0,
@@ -212,8 +218,9 @@ enum OpticalFlowMethodEnum
     eOpticalFlowDualTVL1
 };
 
-using namespace OFX;
-using namespace cv;
+
+static OFX::Color::LutManager<Mutex>* gLutManager;
+
 
 class VectorGeneratorPlugin
     : public GenericOpenCVPlugin
@@ -221,7 +228,7 @@ class VectorGeneratorPlugin
 public:
     /** @brief ctor */
     VectorGeneratorPlugin(OfxImageEffectHandle handle)
-    : GenericOpenCVPlugin(handle)
+    : GenericOpenCVPlugin( handle, gLutManager->sRGBLut() )
     , _rChannel(0)
     , _gChannel(0)
     , _bChannel(0)
@@ -677,8 +684,7 @@ VectorGeneratorPlugin::getFramesNeeded(const OFX::FramesNeededArguments &args,
     }
 }
 
-mDeclarePluginFactory(VectorGeneratorPluginFactory, {}, {}
-                      );
+mDeclarePluginFactory(VectorGeneratorPluginFactory,  { gLutManager = new OFX::Color::LutManager<Mutex>; }, { delete gLutManager; });
 
 using namespace OFX;
 void
@@ -923,3 +929,4 @@ VectorGeneratorPluginFactory::createInstance(OfxImageEffectHandle handle,
 static VectorGeneratorPluginFactory p(kPluginIdentifier, kPluginVersionMajor, kPluginVersionMinor);
 mRegisterPluginFactoryInstance(p)
 
+OFXS_NAMESPACE_ANONYMOUS_EXIT;

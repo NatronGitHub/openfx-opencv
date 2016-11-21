@@ -44,7 +44,7 @@
 
 namespace OFX {
 namespace Color {
-class LutBase;
+class Lut;
 }
 }
 
@@ -95,7 +95,7 @@ class GenericOpenCVPlugin
 {
 public:
     /** @brief ctor */
-    GenericOpenCVPlugin(OfxImageEffectHandle handle);
+    GenericOpenCVPlugin(OfxImageEffectHandle handle, const OFX::Color::Lut* lut_8bit);
 
 private:
     // override the roi call
@@ -119,7 +119,7 @@ protected:
     // do not need to delete these, the ImageEffect is managing them for us
     OFX::Clip *_dstClip;
     OFX::Clip *_srcClip;
-    const OFX::Color::LutBase* _srgbLut;
+    const OFX::Color::Lut* _srgbLut;
 };
 
 void genericCVDescribe(const std::string & pluginName,
