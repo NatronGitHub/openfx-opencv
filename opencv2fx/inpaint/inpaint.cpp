@@ -150,7 +150,7 @@ createInstance( OfxImageEffectHandle effect)
   MyInstanceData *myData = new MyInstanceData;
   if (myData==NULL) return kOfxStatFailed;
 
-  char *context = 0;
+  const char *context = 0;
   stat = gPropHost->propGetString(effectProps, kOfxImageEffectPropContext, 0,  &context);
   OFX::throwSuiteStatusException(stat);
   myData->isGeneralEffect = context && (strcmp(context, kOfxImageEffectContextGeneral) == 0);
@@ -237,7 +237,7 @@ static OfxStatus render(OfxImageEffectHandle instance,
     int dstRowBytes;//, dstBitDepth;
     OfxRectI dstRect;
     void *dstPtr = 0;
-    char* dstBitDepthStr = 0;
+    const char* dstBitDepthStr = 0;
     stat = gPropHost->propGetPointer(outputImg, kOfxImagePropData, 0, &dstPtr);
     OFX::throwSuiteStatusException(stat);
     stat = gPropHost->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
@@ -264,7 +264,7 @@ static OfxStatus render(OfxImageEffectHandle instance,
     int srcRowBytes;//, srcBitDepth;
     OfxRectI srcRect;
     void *srcPtr = 0;
-    char* srcBitDepthStr = 0;
+    const char* srcBitDepthStr = 0;
     stat = gPropHost->propGetPointer(sourceImg, kOfxImagePropData, 0, &srcPtr);
     OFX::throwSuiteStatusException(stat);
     stat = gPropHost->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
