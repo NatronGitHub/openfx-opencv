@@ -40,7 +40,7 @@
 #include "ofxsImageEffect.h"
 #include "ofxsMacros.h"
 
-#include <cv.h>
+#include <opencv2/opencv.hpp>
 
 namespace OFX {
 namespace Color {

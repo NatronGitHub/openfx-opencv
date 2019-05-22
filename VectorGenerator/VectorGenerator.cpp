@@ -80,12 +80,18 @@
 #if CV_MAJOR_VERSION >= 3
 #include <opencv2/video.hpp>
 #include <opencv2/superres.hpp>
+#if CV_MAJOR_VERSION >= 4
+#include <opencv2/core/types_c.h>
+#endif
 #else
 #define VECTOR_GENERATOR_WITH_SIMPLE_FLOW
 #endif
 
 using namespace OFX;
 using namespace cv;
+#if CV_MAJOR_VERSION >= 4
+using namespace cv::superres;
+#endif
 
 OFXS_NAMESPACE_ANONYMOUS_ENTER;
 
@@ -476,7 +482,11 @@ VectorGeneratorPlugin::calcOpticalFlow(const OFX::Image* ref,
         tvl1->setScalesNumber(nScales);
         tvl1->setWarpingsNumber(warps);
         tvl1->setEpsilon(epsilon);
+#if CV_MAJOR_VERSION >= 4
+        tvl1->setIterations(iterations);
+#else
         tvl1->setInnerIterations(iterations);
+#endif
 #endif
         tvl1->calc(srcRefMatImg,srcOtherMatImg,flow);
     }
